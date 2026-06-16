@@ -381,10 +381,10 @@ static void drawUI(sf::RenderWindow& w, const sf::Font& font,
 
     // Подсказки
     float hy = WIN_H - 60.f;
-    drawText(w, font, "WASD / стрелки   Esc-пауза   R-рекорды",
-             cx, hy, 13, {120,125,155}, true);
-    drawText(w, font, "F5 — сохранить       F6 — загрузить",
-             cx, hy + 19.f, 13, {120,125,155}, true);
+    drawText(w, font, "Esc — пауза      R — рекорды",
+             cx, hy, 12, {120,125,155}, true);
+    drawText(w, font, "F5 — сохранить   F6 — загрузить",
+             cx, hy + 17.f, 12, {120,125,155}, true);
 }
 
 void renderGame(sf::RenderWindow& w, const sf::Font& font,
@@ -466,7 +466,7 @@ void renderPause(sf::RenderWindow& w, const sf::Font& font,
                 ? si.diff + "  /  " + std::to_string(si.score) + " оч."
                 : "Пусто";
             drawText(w, font, info, cx-148.f, ry+13.f, 13,
-                     si.exists ? sf::Color{160,165,185} : sf::Color{50,55,75});
+                     si.exists ? sf::Color{160,165,185} : sf::Color{105,110,140});
 
             // Кнопка действия
             auto ar = pauseSlotActionRect(i);
@@ -477,7 +477,7 @@ void renderPause(sf::RenderWindow& w, const sf::Font& font,
             } else {
                 drawRect(w, ar.left, ar.top, ar.width, ar.height, {18,20,36}, {30,33,55}, 1.f);
                 drawText(w, font, "Пусто", ar.left+ar.width/2.f, ar.top+ar.height/2.f,
-                         12, {40,45,65}, true);
+                         12, {105,110,140}, true);
             }
 
             // Кнопка удаления
@@ -603,7 +603,7 @@ void renderLoadSelect(sf::RenderWindow& w, const sf::Font& font,
             ? si.diff + "  /  " + std::to_string(si.score) + " оч."
             : "Пусто";
         drawText(w, font, info, cx-148.f, ry+13.f, 13,
-                 si.exists ? sf::Color{160,165,185} : sf::Color{50,55,75});
+                 si.exists ? sf::Color{160,165,185} : sf::Color{105,110,140});
 
         // Кнопка загрузки
         auto ar = pauseSlotActionRect(i);
@@ -612,7 +612,7 @@ void renderLoadSelect(sf::RenderWindow& w, const sf::Font& font,
             drawButton(w, font, ar, "Загрузить", {80,180,230}, false, ahov, 12);
         } else {
             drawRect(w, ar.left, ar.top, ar.width, ar.height, {18,20,36}, {30,33,55}, 1.f);
-            drawText(w, font, "Пусто", ar.left+ar.width/2.f, ar.top+ar.height/2.f, 12, {40,45,65}, true);
+            drawText(w, font, "Пусто", ar.left+ar.width/2.f, ar.top+ar.height/2.f, 12, {105,110,140}, true);
         }
 
         // Кнопка удаления
