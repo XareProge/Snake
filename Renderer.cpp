@@ -24,14 +24,10 @@ sf::FloatRect gameOverButtonRect(int i) {
     return { bx, cy + 168.f, bw, 46.f };
 }
 
-sf::FloatRect saveButtonRect() {
-    float ox = (float)(COLS * CELL);
-    return { ox + 12.f, WIN_H - 148.f, UI_W - 24.f, 34.f };
-}
-
-sf::FloatRect loadButtonRect() {
-    float ox = (float)(COLS * CELL);
-    return { ox + 12.f, WIN_H - 106.f, UI_W - 24.f, 34.f };
+sf::FloatRect pauseButtonRect(int i) {
+    // 5 кнопок по центру экрана
+    float cx = WIN_W / 2.f, cy = WIN_H / 2.f;
+    return { cx - 145.f, cy - 90.f + i * 56.f, 290.f, 46.f };
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -368,22 +364,12 @@ static void drawUI(sf::RenderWindow& w, const sf::Font& font,
         }
     }
 
-    // ── Кнопки Сохранить / Загрузить ──────────────────────────
-    {
-        auto sr = saveButtonRect();
-        bool hov = sr.contains((float)mousePos.x, (float)mousePos.y);
-        drawButton(w, font, sr, "Сохранить  [F5]", {72,230,95}, false, hov, 14);
-    }
-    {
-        auto lr = loadButtonRect();
-        bool hov = lr.contains((float)mousePos.x, (float)mousePos.y);
-        drawButton(w, font, lr, "Загрузить  [F6]", {72,230,95}, false, hov, 14);
-    }
-
     // Подсказки
     float hy = WIN_H - 60.f;
-    drawText(w, font, "WASD/стрелки  Esc-меню  R-рекорды",
+    drawText(w, font, "WASD/стрелки  Esc-пауза  R-рекорды",
              cx, hy, 11, {55,60,85}, true);
+    drawText(w, font, "F5-сохранить  F6-загрузить",
+             cx, hy + 18.f, 11, {55,60,85}, true);
 }
 
 void renderGame(sf::RenderWindow& w, const sf::Font& font,
@@ -408,6 +394,52 @@ void renderGame(sf::RenderWindow& w, const sf::Font& font,
         float cy = WIN_H / 2.f;
         drawRect(w, cx-130.f, cy-22.f, 260.f, 44.f, {14,16,28,220}, {72,230,95}, 2.f);
         drawText(w, font, notif, cx, cy, 17, {72,230,95}, true);
+    }
+}
+
+// ════════════════════════════════════════════════════════════════
+// Пауза (накладывается поверх игрового экрана)
+// ════════════════════════════════════════════════════════════════
+
+void renderPause(sf::RenderWindow& w, const sf::Font& font,
+                 const Game& g, const std::string& notif,
+                 sf::Vector2i mousePos)
+{
+    // Полупрозрачный оверлей
+    drawRect(w, 0, 0, (float)WIN_W, (float)WIN_H, {0,0,0,160});
+
+    float cx = WIN_W / 2.f, cy = WIN_H / 2.f;
+
+    // Панель паузы
+    drawRect(w, cx-170.f, cy-118.f, 340.f, 310.f, {14,16,28}, {50,55,80}, 2.f);
+
+    drawText(w, font, "ПАУЗА", cx, cy-108.f, 36, {72,230,95}, true);
+    drawText(w, font, "Счёт: "+std::to_string(g.score), cx, cy-70.f, 16, {160,165,185}, true);
+
+    // Разделитель
+    sf::Vertex sep[] = { {{cx-140.f, cy-50.f},{35,38,62}},
+                         {{cx+140.f, cy-50.f},{35,38,62}} };
+    w.draw(sep, 2, sf::Lines);
+
+    const std::string labels[] = {
+        "Продолжить", "Рестарт", "Сохранить  [F5]", "Загрузить  [F6]", "Главное меню"
+    };
+    const sf::Color colors[] = {
+        {72,230,95}, {228,182,48}, {72,230,95}, {72,230,95}, {160,165,185}
+    };
+    for (int i = 0; i < 5; i++) {
+        auto rect = pauseButtonRect(i);
+        bool hov  = rect.contains((float)mousePos.x, (float)mousePos.y);
+        drawButton(w, font, rect, labels[i], colors[i], false, hov, 16);
+    }
+
+    // Уведомление (сохранено / ошибка) внутри панели
+    if (!notif.empty()) {
+        float ny = cy + 160.f;
+        bool err = notif.find("Нет") != std::string::npos;
+        sf::Color c = err ? sf::Color{230,80,80} : sf::Color{72,230,95};
+        drawRect(w, cx-135.f, ny-6.f, 270.f, 28.f, {14,16,28,200}, c, 1.f);
+        drawText(w, font, notif, cx, ny, 13, c, true);
     }
 }
 

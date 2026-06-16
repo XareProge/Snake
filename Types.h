@@ -14,6 +14,7 @@ enum class State {
     MENU,         // главное меню
     DIFFICULTY,   // выбор сложности
     PLAYING,      // игровой процесс
+    PAUSED,       // пауза
     GAME_OVER,    // конец игры
     RECORDS       // таблица рекордов
 };

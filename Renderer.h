@@ -13,8 +13,7 @@
 sf::FloatRect menuButtonRect(int i);        // 0=Начать, 1=ИИ, 2=Загрузить, 3=Рекорды, 4=Выход
 sf::FloatRect diffButtonRect(int i);        // 0=Безобидный … 3=Сложный
 sf::FloatRect gameOverButtonRect(int i);    // 0=Заново, 1=В меню
-sf::FloatRect saveButtonRect();             // кнопка «Сохранить» в панели
-sf::FloatRect loadButtonRect();             // кнопка «Загрузить» в панели
+sf::FloatRect pauseButtonRect(int i);       // 0=Продолжить, 1=Рестарт, 2=Сохранить, 3=Загрузить, 4=В меню
 
 
 // ════════════════════════════════════════════════════════════════
@@ -41,6 +40,11 @@ void renderGame(sf::RenderWindow& w, const sf::Font& font,
 void renderGameOver(sf::RenderWindow& w, const sf::Font& font,
                     const Game& g, const std::vector<Record>& recs,
                     sf::Vector2i mousePos);
+
+// notif — уведомление внутри паузы (сохранено / ошибка загрузки)
+void renderPause(sf::RenderWindow& w, const sf::Font& font,
+                 const Game& g, const std::string& notif,
+                 sf::Vector2i mousePos);
 
 void renderRecords(sf::RenderWindow& w, const sf::Font& font,
                    const std::vector<Record>& recs);

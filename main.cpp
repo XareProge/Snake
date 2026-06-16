@@ -62,6 +62,8 @@ int main() {
     sf::Clock               notifClock;       // таймер уведомления в игре
     std::string             menuNotif;        // текст ошибки в главном меню
     sf::Clock               menuNotifClock;   // таймер ошибки меню
+    std::string             pauseNotif;       // уведомление внутри паузы
+    sf::Clock               pauseNotifClock;  // таймер уведомления паузы
     sf::Clock               tickClock;
 
     // ─── Главный цикл ────────────────────────────────────────────
@@ -118,8 +120,9 @@ int main() {
                 }
 
                 else if (state == State::PLAYING) {
-                    if (k == sf::Keyboard::Escape) { state = State::MENU; menuSel = 0; }
-                    if (k == sf::Keyboard::R)      { records = loadRecords(); state = State::RECORDS; }
+                    if (k == sf::Keyboard::Escape || k == sf::Keyboard::P)
+                        state = State::PAUSED;
+                    if (k == sf::Keyboard::R) { records = loadRecords(); state = State::RECORDS; }
                     // Сохранение (F5)
                     if (k == sf::Keyboard::F5 && game) {
                         if (game->saveToFile(SAVE_FILE)) {
@@ -142,6 +145,34 @@ int main() {
                         }
                     }
                     if (game) game->handleKey(k); // игнорируется если aiMode
+                }
+
+                else if (state == State::PAUSED) {
+                    // Продолжить
+                    if (k == sf::Keyboard::Escape || k == sf::Keyboard::P) {
+                        state = State::PLAYING;
+                        tickClock.restart();
+                    }
+                    // Сохранение (F5) из паузы
+                    if (k == sf::Keyboard::F5 && game) {
+                        if (game->saveToFile(SAVE_FILE)) {
+                            pauseNotif = "Игра сохранена!";
+                            pauseNotifClock.restart();
+                        }
+                    }
+                    // Загрузка (F6) из паузы
+                    if (k == sf::Keyboard::F6 && game) {
+                        auto loaded = std::make_unique<Game>(Diff::HARMLESS);
+                        if (loaded->loadFromFile(SAVE_FILE)) {
+                            game = std::move(loaded);
+                            aiPath.clear();
+                            state = State::PLAYING;
+                            tickClock.restart();
+                        } else {
+                            pauseNotif = "Нет файла сохранения!";
+                            pauseNotifClock.restart();
+                        }
+                    }
                 }
 
                 else if (state == State::GAME_OVER) {
@@ -197,23 +228,40 @@ int main() {
                     }
                 }
 
-                else if (state == State::PLAYING && game) {
-                    // Кнопка «Сохранить»
-                    if (saveButtonRect().contains((float)mp.x, (float)mp.y)) {
+                else if (state == State::PAUSED && game) {
+                    // 0 — Продолжить
+                    if (pauseButtonRect(0).contains((float)mp.x, (float)mp.y)) {
+                        state = State::PLAYING;
+                        tickClock.restart();
+                    }
+                    // 1 — Рестарт
+                    if (pauseButtonRect(1).contains((float)mp.x, (float)mp.y)) {
+                        game = std::make_unique<Game>(game->diff, game->aiMode);
+                        aiPath.clear(); tickClock.restart();
+                        state = State::PLAYING;
+                    }
+                    // 2 — Сохранить
+                    if (pauseButtonRect(2).contains((float)mp.x, (float)mp.y)) {
                         if (game->saveToFile(SAVE_FILE)) {
-                            notif = "Игра сохранена!";
-                            notifClock.restart();
+                            pauseNotif = "Игра сохранена!";
+                            pauseNotifClock.restart();
                         }
                     }
-                    // Кнопка «Загрузить»
-                    if (loadButtonRect().contains((float)mp.x, (float)mp.y)) {
+                    // 3 — Загрузить
+                    if (pauseButtonRect(3).contains((float)mp.x, (float)mp.y)) {
                         auto loaded = std::make_unique<Game>(Diff::HARMLESS);
                         if (loaded->loadFromFile(SAVE_FILE)) {
                             game = std::move(loaded);
                             aiPath.clear(); tickClock.restart();
-                            notif = "Игра загружена!";
-                            notifClock.restart();
+                            state = State::PLAYING;
+                        } else {
+                            pauseNotif = "Нет файла сохранения!";
+                            pauseNotifClock.restart();
                         }
+                    }
+                    // 4 — Главное меню
+                    if (pauseButtonRect(4).contains((float)mp.x, (float)mp.y)) {
+                        state = State::MENU; menuSel = 0;
                     }
                 }
 
@@ -258,6 +306,9 @@ int main() {
         // Скрываем ошибку меню через 2.5 секунды
         if (!menuNotif.empty() && menuNotifClock.getElapsedTime().asSeconds() > 2.5f)
             menuNotif.clear();
+        // Скрываем уведомление паузы через 2 секунды
+        if (!pauseNotif.empty() && pauseNotifClock.getElapsedTime().asSeconds() > 2.f)
+            pauseNotif.clear();
 
         // ── Отрисовка кадра ──────────────────────────────────────
         window.clear({ 10, 12, 22 });
@@ -271,6 +322,12 @@ int main() {
                 break;
             case State::PLAYING:
                 if (game) renderGame(window, font, *game, aiPath, notif, mousePos);
+                break;
+            case State::PAUSED:
+                if (game) {
+                    renderGame(window, font, *game, aiPath, {}, mousePos);
+                    renderPause(window, font, *game, pauseNotif, mousePos);
+                }
                 break;
             case State::GAME_OVER:
                 if (game) renderGameOver(window, font, *game, records, mousePos);
