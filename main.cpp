@@ -66,8 +66,9 @@ int main() {
     { auto icon = createSnakeIcon(); window.setIcon(32, 32, icon.getPixelsPtr()); }
 
     sf::Font font;
-    if (!font.loadFromFile("C:/Windows/Fonts/consola.ttf"))
-        font.loadFromFile("C:/Windows/Fonts/arial.ttf");
+    if (!font.loadFromFile("assets/PressStart2P.ttf"))
+        if (!font.loadFromFile("C:/Windows/Fonts/consola.ttf"))
+            font.loadFromFile("C:/Windows/Fonts/arial.ttf");
 
     // ─── Состояние приложения ────────────────────────────────────
     State      state      = State::MENU;

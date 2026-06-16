@@ -7,7 +7,6 @@
 // ════════════════════════════════════════════════════════════════
 
 sf::FloatRect menuButtonRect(int i) {
-    // 5 кнопок, расположены по центру окна
     float cx = WIN_W / 2.f;
     return { cx - 155.f, 158.f + i * 62.f, 310.f, 50.f };
 }
@@ -18,7 +17,6 @@ sf::FloatRect diffButtonRect(int i) {
 }
 
 sf::FloatRect gameOverButtonRect(int i) {
-    // 0 = «Играть снова» (слева), 1 = «В меню» (справа)
     float cx = WIN_W / 2.f, cy = WIN_H / 2.f - 80.f;
     float bw = 160.f, bx = (i == 0) ? cx - bw - 10.f : cx + 10.f;
     return { bx, cy + 168.f, bw, 46.f };
@@ -29,7 +27,6 @@ sf::FloatRect pauseButtonRect(int i) {
     return { cx - 145.f, cy - 90.f + i * 56.f, 290.f, 46.f };
 }
 
-// Слот-панель паузы: строки слотов начинаются с cy-102, шаг 56px
 sf::FloatRect pauseSlotActionRect(int slot) {
     float cx = WIN_W / 2.f, cy = WIN_H / 2.f;
     return { cx + 74.f, cy - 96.f + slot * 56.f, 100.f, 34.f };
@@ -90,11 +87,10 @@ void drawText(sf::RenderWindow& w, const sf::Font& f, const std::string& txt,
 // Внутренние вспомогательные функции
 // ════════════════════════════════════════════════════════════════
 
-// Универсальная кнопка с поддержкой hover и selected
 static void drawButton(sf::RenderWindow& w, const sf::Font& font,
                         sf::FloatRect rect, const std::string& label,
                         sf::Color activeColor, bool sel, bool hov,
-                        int fontSize = 18)
+                        int fontSize = 12)
 {
     bool hi = sel || hov;
     sf::Color bg  = hi    ? sf::Color{ 25, 55, 35 }  : sf::Color{ 18, 20, 36 };
@@ -111,7 +107,6 @@ static void drawButton(sf::RenderWindow& w, const sf::Font& font,
              fontSize, tc, true);
 }
 
-// Декоративная сетка для экранов меню
 static void drawBgGrid(sf::RenderWindow& w) {
     sf::Color col{ 18, 20, 36 };
     for (int x = 0; x <= WIN_W; x += CELL) {
@@ -125,7 +120,7 @@ static void drawBgGrid(sf::RenderWindow& w) {
 }
 
 // ════════════════════════════════════════════════════════════════
-// Главное меню (5 пунктов)
+// Главное меню
 // ════════════════════════════════════════════════════════════════
 
 void renderMenu(sf::RenderWindow& w, const sf::Font& font,
@@ -136,32 +131,29 @@ void renderMenu(sf::RenderWindow& w, const sf::Font& font,
     drawBgGrid(w);
 
     float cx = WIN_W / 2.f;
-    // Заголовок над кнопками
-    drawText(w, font, "ЗМЕЙКА",           cx, 45.f,  60, { 72, 230, 95 }, true);
-    drawText(w, font, "классическая игра", cx, 115.f, 16, { 45, 120, 65 }, true);
+    drawText(w, font, "ЗМЕЙКА",           cx, 45.f,  28, { 72, 230, 95 }, true);
+    drawText(w, font, "классическая игра", cx, 100.f, 11, { 45, 120, 65 }, true);
 
     const std::string labels[] = {
         "Начать игру", "ИИ-режим", "Загрузить игру", "Рекорды", "Выход"
     };
-    // Цвет ИИ-режима — синеватый, остальные зелёные
     const sf::Color colors[] = {
         {72,230,95}, {80,180,230}, {72,230,95}, {72,230,95}, {72,230,95}
     };
     for (int i = 0; i < 5; i++) {
         auto rect = menuButtonRect(i);
         bool hov  = rect.contains((float)mousePos.x, (float)mousePos.y);
-        drawButton(w, font, rect, labels[i], colors[i], selected == i, hov, 20);
+        drawButton(w, font, rect, labels[i], colors[i], selected == i, hov, 12);
     }
 
-    // Ошибка загрузки: красная плашка над подсказкой
     if (!notif.empty()) {
         float ny = WIN_H - 65.f;
-        drawRect(w, cx - 185.f, ny - 7.f, 370.f, 34.f, {40,10,10,220}, {230,80,80}, 1.5f);
-        drawText(w, font, notif, cx, ny, 15, {230,80,80}, true);
+        drawRect(w, cx - 185.f, ny - 10.f, 370.f, 36.f, {40,10,10,220}, {230,80,80}, 1.5f);
+        drawText(w, font, notif, cx, ny, 10, {230,80,80}, true);
     }
 
     drawText(w, font, "стрелки / WASD — выбор       Enter — подтвердить",
-             cx, WIN_H - 32.f, 16, {130,135,165}, true);
+             cx, WIN_H - 28.f, 10, {130,135,165}, true);
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -175,10 +167,9 @@ void renderDifficulty(sf::RenderWindow& w, const sf::Font& font,
     drawBgGrid(w);
 
     float cx = WIN_W / 2.f;
-    // Заголовок меняется в зависимости от режима
     std::string title = aiPending ? "ИИ-РЕЖИМ: СЛОЖНОСТЬ" : "СЛОЖНОСТЬ";
     sf::Color titleCol = aiPending ? sf::Color{80,180,230} : sf::Color{72,230,95};
-    drawText(w, font, title, cx, WIN_H / 2.f - 155.f, 44, titleCol, true);
+    drawText(w, font, title, cx, WIN_H / 2.f - 155.f, 22, titleCol, true);
 
     const std::string names[] = { "Безобидный", "Лёгкий", "Средний", "Сложный" };
     const std::string descs[] = {
@@ -205,18 +196,17 @@ void renderDifficulty(sf::RenderWindow& w, const sf::Font& font,
                  bg, brd, sel || hov ? 2.f : 1.f);
         sf::Color nc = sel || hov ? cols[i]                    : sf::Color{140,145,165};
         sf::Color dc = sel || hov ? sf::Color{160,165,185}     : sf::Color{75,80,105};
-        drawText(w, font, names[i], cx, rect.top + 12.f, 20, nc, true);
-        drawText(w, font, descs[i], cx, rect.top + 34.f, 13, dc, true);
+        drawText(w, font, names[i], cx, rect.top + 12.f, 12, nc, true);
+        drawText(w, font, descs[i], cx, rect.top + 34.f,  9, dc, true);
     }
 
-    drawText(w, font, "Esc — назад", cx, WIN_H - 32.f, 16, {130,135,165}, true);
+    drawText(w, font, "Esc — назад", cx, WIN_H - 28.f, 10, {130,135,165}, true);
 }
 
 // ════════════════════════════════════════════════════════════════
 // Игровой экран
 // ════════════════════════════════════════════════════════════════
 
-// Сетка поля
 static void drawGrid(sf::RenderWindow& w) {
     int gw = COLS * CELL;
     drawRect(w, 0, 0, (float)gw, (float)WIN_H, {10,12,22});
@@ -231,7 +221,6 @@ static void drawGrid(sf::RenderWindow& w) {
     }
 }
 
-// Объект на клетке поля
 static void drawCell(sf::RenderWindow& w, int gx, int gy, Cell c) {
     float x = gx*CELL, y = gy*CELL;
     float pad = 2.f, sz = CELL - pad*2;
@@ -276,11 +265,9 @@ static void drawCell(sf::RenderWindow& w, int gx, int gy, Cell c) {
     }
 }
 
-// Путь ИИ — полупрозрачные точки
 static void drawAIPath(sf::RenderWindow& w, const std::vector<Pt>& path) {
     int total = (int)path.size();
     for (int i = 0; i < total; i++) {
-        // Интенсивность уменьшается к концу пути
         float t   = 1.f - (float)i / (float)(total + 1);
         uint8_t a = (uint8_t)(180 * t);
         float cx  = path[i].x * CELL + CELL / 2.f;
@@ -289,11 +276,9 @@ static void drawAIPath(sf::RenderWindow& w, const std::vector<Pt>& path) {
     }
 }
 
-// Змейка
 static void drawSnake(sf::RenderWindow& w, const Game& g) {
     float pad = 3.f, sz = CELL - pad*2;
 
-    // Тело с хвоста к голове
     for (size_t i = g.snake.size(); i-- > 0; ) {
         float t = (float)i / (float)g.snake.size();
         sf::Color col = lerpColor({42,175,68}, {18,80,35}, t*0.7f);
@@ -302,7 +287,6 @@ static void drawSnake(sf::RenderWindow& w, const Game& g) {
         drawRect(w, x+pad+2, y+pad+2, sz*0.45f, 2.f, {140,255,150,100});
     }
 
-    // Голова: жёлтая при инверсии, голубая в ИИ-режиме, зелёная в норме
     if (!g.snake.empty()) {
         float x = g.snake[0].x*CELL, y = g.snake[0].y*CELL;
         sf::Color head = g.invCtrl  ? sf::Color{228,182,48}  :
@@ -318,7 +302,6 @@ static void drawSnake(sf::RenderWindow& w, const Game& g) {
     }
 }
 
-// Правая панель с кнопками Сохранить/Загрузить
 static void drawUI(sf::RenderWindow& w, const sf::Font& font,
                    const Game& g, sf::Vector2i mousePos)
 {
@@ -329,65 +312,64 @@ static void drawUI(sf::RenderWindow& w, const sf::Font& font,
     sf::Vertex sep[] = { {{ox,0},{35,38,62}}, {{ox,(float)WIN_H},{35,38,62}} };
     w.draw(sep, 2, sf::Lines);
 
-    // Заголовок + бейджи режима
-    drawText(w, font, "ЗМЕЙКА", cx, 18.f, 44, {72,230,95}, true);
+    // Заголовок
+    drawText(w, font, "ЗМЕЙКА", cx, 18.f, 20, {72,230,95}, true);
     if (g.aiMode) {
-        drawRect(w, ox+12.f, 68.f, UI_W-24.f, 22.f, {15,40,65});
-        drawText(w, font, "ИИ-РЕЖИМ", cx, 71.f, 14, {80,180,230}, true);
+        drawRect(w, ox+12.f, 50.f, UI_W-24.f, 22.f, {15,40,65});
+        drawText(w, font, "ИИ-РЕЖИМ", cx, 54.f, 10, {80,180,230}, true);
     } else {
         sf::Color dc = (g.diff==Diff::HARD   ? sf::Color{230,80,80}  :
                         g.diff==Diff::MEDIUM  ? sf::Color{228,182,48} :
                         g.diff==Diff::EASY    ? sf::Color{120,200,90} :
                                                sf::Color{72,230,95});
-        drawText(w, font, diffName(g.diff), cx, 70.f, 14, dc, true);
+        drawText(w, font, diffName(g.diff), cx, 54.f, 10, dc, true);
     }
 
     // Счёт
-    drawRect(w, ox+12.f, 98.f, UI_W-24.f, 78.f, {20,22,40});
-    drawText(w, font, "СЧЁТ",                  cx, 106.f, 16, {120,125,155}, true);
-    drawText(w, font, std::to_string(g.score), cx, 126.f, 38, {255,255,255}, true);
+    drawRect(w, ox+12.f, 86.f, UI_W-24.f, 78.f, {20,22,40});
+    drawText(w, font, "СЧЁТ",                  cx, 96.f,  11, {120,125,155}, true);
+    drawText(w, font, std::to_string(g.score), cx, 120.f, 22, {255,255,255}, true);
 
     // Длина
-    drawRect(w, ox+12.f, 190.f, UI_W-24.f, 68.f, {20,22,40});
-    drawText(w, font, "ДЛИНА",                         cx, 198.f, 16, {120,125,155}, true);
-    drawText(w, font, std::to_string(g.snake.size()),  cx, 218.f, 28, {200,205,225}, true);
+    drawRect(w, ox+12.f, 176.f, UI_W-24.f, 60.f, {20,22,40});
+    drawText(w, font, "ДЛИНА",                         cx, 186.f, 11, {120,125,155}, true);
+    drawText(w, font, std::to_string(g.snake.size()),  cx, 206.f, 16, {200,205,225}, true);
 
     // Инверсия
     if (g.invCtrl) {
-        drawRect(w, ox+12.f, 270.f, UI_W-24.f, 36.f, {60,45,10});
-        drawText(w, font, "! ИНВЕРСИЯ !", cx, 280.f, 13, {228,182,48}, true);
+        drawRect(w, ox+12.f, 248.f, UI_W-24.f, 30.f, {60,45,10});
+        drawText(w, font, "! ИНВЕРСИЯ !", cx, 256.f, 10, {228,182,48}, true);
     }
 
-    // Легенда (для сложностей с особыми объектами)
+    // Легенда
     if (g.diff >= Diff::MEDIUM) {
-        float ly = 322.f;
-        drawText(w, font, "ОБЪЕКТЫ", cx, ly, 12, {100,105,135}, true);
-        ly += 20.f;
-        drawCircle(w, ox+22.f, ly+6.f, 5.f, {168,48,230});
-        drawText(w, font, "яд  -15 очков", ox+34.f, ly, 11, {160,165,185});
+        float ly = 296.f;
+        drawText(w, font, "ОБЪЕКТЫ", cx, ly, 10, {100,105,135}, true);
+        ly += 18.f;
+        drawCircle(w, ox+22.f, ly+5.f, 5.f, {168,48,230});
+        drawText(w, font, "яд  -15 очков", ox+34.f, ly, 9, {160,165,185});
         if (g.diff == Diff::HARD) {
-            ly += 22.f;
+            ly += 20.f;
             sf::CircleShape ring(5.f); ring.setOrigin(5.f,5.f);
-            ring.setPosition(ox+22.f, ly+6.f);
+            ring.setPosition(ox+22.f, ly+5.f);
             ring.setFillColor(sf::Color::Transparent);
             ring.setOutlineColor({45,205,225}); ring.setOutlineThickness(2.f);
             w.draw(ring);
-            drawText(w, font, "телепорт", ox+34.f, ly, 11, {160,165,185});
-            ly += 22.f;
-            drawCircle(w, ox+22.f, ly+6.f, 5.f, {228,182,48});
-            drawText(w, font, "инверсия", ox+34.f, ly, 11, {160,165,185});
+            drawText(w, font, "телепорт", ox+34.f, ly, 9, {160,165,185});
+            ly += 20.f;
+            drawCircle(w, ox+22.f, ly+5.f, 5.f, {228,182,48});
+            drawText(w, font, "инверсия", ox+34.f, ly, 9, {160,165,185});
         }
     }
 
-    // Подсказки
-    float hy = WIN_H - 60.f;
+    // Подсказки (столбик внизу панели)
     const char* hints[] = {
         "WASD / стрелки", "Esc — пауза",
         "R — рекорды",    "F5 — сохранить", "F6 — загрузить"
     };
-    float hy0 = WIN_H - 92.f;
+    float hy0 = WIN_H - 96.f;
     for (int i = 0; i < 5; i++)
-        drawText(w, font, hints[i], cx, hy0 + i * 16.f, 12, {120,125,155}, true);
+        drawText(w, font, hints[i], cx, hy0 + i * 18.f, 10, {120,125,155}, true);
 }
 
 void renderGame(sf::RenderWindow& w, const sf::Font& font,
@@ -400,23 +382,21 @@ void renderGame(sf::RenderWindow& w, const sf::Font& font,
             if (g.grid[y][x] != Cell::EMPTY)
                 drawCell(w, x, y, g.grid[y][x]);
 
-    // Путь ИИ рисуем под змейкой
     if (!path.empty()) drawAIPath(w, path);
 
     drawSnake(w, g);
     drawUI(w, font, g, mousePos);
 
-    // Уведомление (сохранено/загружено)
     if (!notif.empty()) {
         float cx = (float)(COLS * CELL) / 2.f;
         float cy = WIN_H / 2.f;
-        drawRect(w, cx-130.f, cy-22.f, 260.f, 44.f, {14,16,28,220}, {72,230,95}, 2.f);
-        drawText(w, font, notif, cx, cy, 17, {72,230,95}, true);
+        drawRect(w, cx-145.f, cy-22.f, 290.f, 44.f, {14,16,28,220}, {72,230,95}, 2.f);
+        drawText(w, font, notif, cx, cy, 11, {72,230,95}, true);
     }
 }
 
 // ════════════════════════════════════════════════════════════════
-// Пауза (накладывается поверх игрового экрана)
+// Пауза
 // ════════════════════════════════════════════════════════════════
 
 void renderPause(sf::RenderWindow& w, const sf::Font& font,
@@ -428,11 +408,10 @@ void renderPause(sf::RenderWindow& w, const sf::Font& font,
     float cx = WIN_W / 2.f, cy = WIN_H / 2.f;
 
     if (panel == PausePanel::NONE) {
-        // ── Главное меню паузы ──────────────────────────────
         drawRect(w, cx-170.f, cy-118.f, 340.f, 310.f, {14,16,28}, {50,55,80}, 2.f);
-        drawText(w, font, "ПАУЗА",                          cx, cy-108.f, 36, {72,230,95},    true);
-        drawText(w, font, "Счёт: "+std::to_string(g.score), cx, cy-70.f,  16, {160,165,185},  true);
-        sf::Vertex sep[] = { {{cx-140.f,cy-50.f},{35,38,62}}, {{cx+140.f,cy-50.f},{35,38,62}} };
+        drawText(w, font, "ПАУЗА",                          cx, cy-108.f, 20, {72,230,95},    true);
+        drawText(w, font, "Счёт: "+std::to_string(g.score), cx, cy-78.f,  11, {160,165,185},  true);
+        sf::Vertex sep[] = { {{cx-140.f,cy-60.f},{35,38,62}}, {{cx+140.f,cy-60.f},{35,38,62}} };
         w.draw(sep, 2, sf::Lines);
         const std::string labels[] = {
             "Продолжить", "Рестарт", "Сохранить  [F5]", "Загрузить  [F6]", "Главное меню"
@@ -443,19 +422,18 @@ void renderPause(sf::RenderWindow& w, const sf::Font& font,
         for (int i = 0; i < 5; i++) {
             auto r = pauseButtonRect(i);
             drawButton(w, font, r, labels[i], colors[i], false,
-                       r.contains((float)mousePos.x,(float)mousePos.y), 16);
+                       r.contains((float)mousePos.x,(float)mousePos.y), 10);
         }
     } else {
-        // ── Панель выбора слота ──────────────────────────────
         drawRect(w, cx-220.f, cy-180.f, 440.f, 380.f, {14,16,28}, {50,55,80}, 2.f);
-        drawText(w, font, "ПАУЗА", cx, cy-170.f, 28, {72,230,95}, true);
+        drawText(w, font, "ПАУЗА", cx, cy-170.f, 16, {72,230,95}, true);
 
         bool saving = (panel == PausePanel::SAVING);
         drawText(w, font,
                  saving ? "Выберите слот для сохранения" : "Выберите слот для загрузки",
-                 cx, cy-138.f, 14, {120,125,155}, true);
+                 cx, cy-145.f, 10, {120,125,155}, true);
 
-        sf::Vertex s1[] = { {{cx-200.f,cy-118.f},{35,38,62}}, {{cx+200.f,cy-118.f},{35,38,62}} };
+        sf::Vertex s1[] = { {{cx-200.f,cy-125.f},{35,38,62}}, {{cx+200.f,cy-125.f},{35,38,62}} };
         w.draw(s1, 2, sf::Lines);
 
         for (int i = 0; i < 3; i++) {
@@ -463,33 +441,31 @@ void renderPause(sf::RenderWindow& w, const sf::Font& font,
             const auto& si = slotInfos[i];
 
             drawRect(w, cx-210.f, ry, 380.f, 44.f, {20,22,40}, {35,38,62}, 1.f);
-            drawText(w, font, "Слот "+std::to_string(i+1), cx-200.f, ry+13.f, 12, {100,105,135});
+            drawText(w, font, "Слот "+std::to_string(i+1), cx-200.f, ry+14.f, 10, {100,105,135});
 
             std::string info = si.exists
                 ? si.diff + "  /  " + std::to_string(si.score) + " оч."
                 : "Пусто";
-            drawText(w, font, info, cx-148.f, ry+13.f, 13,
+            drawText(w, font, info, cx-148.f, ry+14.f, 10,
                      si.exists ? sf::Color{160,165,185} : sf::Color{105,110,140});
 
-            // Кнопка действия
             auto ar = pauseSlotActionRect(i);
             bool ahov = ar.contains((float)mousePos.x, (float)mousePos.y);
             if (saving || si.exists) {
                 sf::Color ac = saving ? sf::Color{72,230,95} : sf::Color{80,180,230};
-                drawButton(w, font, ar, saving ? "Сохранить" : "Загрузить", ac, false, ahov, 12);
+                drawButton(w, font, ar, saving ? "Сохранить" : "Загрузить", ac, false, ahov, 10);
             } else {
                 drawRect(w, ar.left, ar.top, ar.width, ar.height, {18,20,36}, {30,33,55}, 1.f);
                 drawText(w, font, "Пусто", ar.left+ar.width/2.f, ar.top+ar.height/2.f,
-                         12, {105,110,140}, true);
+                         10, {105,110,140}, true);
             }
 
-            // Кнопка удаления
             if (si.exists) {
                 auto dr = pauseSlotDeleteRect(i);
                 bool dhov = dr.contains((float)mousePos.x, (float)mousePos.y);
                 sf::Color dc = dhov ? sf::Color{230,80,80} : sf::Color{140,60,60};
                 drawRect(w, dr.left, dr.top, dr.width, dr.height, {30,12,12}, dc, dhov?2.f:1.f);
-                drawText(w, font, "X", dr.left+dr.width/2.f, dr.top+dr.height/2.f, 14, dc, true);
+                drawText(w, font, "X", dr.left+dr.width/2.f, dr.top+dr.height/2.f, 12, dc, true);
             }
         }
 
@@ -498,28 +474,26 @@ void renderPause(sf::RenderWindow& w, const sf::Font& font,
 
         auto br = pauseBackRect();
         drawButton(w, font, br, "<  Назад", {160,165,185}, false,
-                   br.contains((float)mousePos.x,(float)mousePos.y), 15);
+                   br.contains((float)mousePos.x,(float)mousePos.y), 11);
     }
 
-    // Уведомление — всегда у нижнего края панели
     if (!notif.empty()) {
         bool err = notif.find("Нет") != std::string::npos;
         sf::Color c = err ? sf::Color{230,80,80} : sf::Color{72,230,95};
         float ny = cy + (panel == PausePanel::NONE ? 160.f : 175.f);
-        drawRect(w, cx-145.f, ny-6.f, 290.f, 28.f, {14,16,28,210}, c, 1.f);
-        drawText(w, font, notif, cx, ny, 13, c, true);
+        drawRect(w, cx-145.f, ny-8.f, 290.f, 30.f, {14,16,28,210}, c, 1.f);
+        drawText(w, font, notif, cx, ny, 10, c, true);
     }
 }
 
 // ════════════════════════════════════════════════════════════════
-// Обратный отсчёт (3-2-1) перед возобновлением игры
+// Обратный отсчёт (3-2-1)
 // ════════════════════════════════════════════════════════════════
 
 void renderCountdown(sf::RenderWindow& w, const sf::Font& font, float elapsed) {
     int num = 3 - (int)elapsed;
     if (num <= 0) return;
 
-    // Плавное угасание в конце каждой секунды
     float frac  = elapsed - (int)elapsed;
     float alpha = frac < 0.55f ? 1.f : 1.f - (frac - 0.55f) / 0.45f;
     uint8_t a   = (uint8_t)(alpha * 255.f);
@@ -528,8 +502,8 @@ void renderCountdown(sf::RenderWindow& w, const sf::Font& font, float elapsed) {
     float cy = WIN_H / 2.f;
 
     drawCircle(w, cx, cy, 50.f, {10,12,22, (uint8_t)(a * 0.85f)});
-    drawText(w, font, std::to_string(num), cx, cy, 88, {72,230,95,a}, true);
-    drawText(w, font, "Приготовься!", cx, cy+58.f, 14, {72,230,95, (uint8_t)(a*0.75f)}, true);
+    drawText(w, font, std::to_string(num), cx, cy,      40, {72,230,95,a}, true);
+    drawText(w, font, "Приготовься!",      cx, cy+52.f, 11, {72,230,95, (uint8_t)(a*0.75f)}, true);
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -540,7 +514,6 @@ void renderGameOver(sf::RenderWindow& w, const sf::Font& font,
                     const Game& g, const std::vector<Record>& recs,
                     sf::Vector2i mousePos)
 {
-    // Поле под оверлеем (без пути — игра закончена)
     renderGame(w, font, g, {}, {}, mousePos);
 
     drawRect(w, 0, 0, (float)WIN_W, (float)WIN_H, {0,0,0,170});
@@ -548,20 +521,18 @@ void renderGameOver(sf::RenderWindow& w, const sf::Font& font,
     float cx = WIN_W / 2.f, cy = WIN_H / 2.f - 80.f;
     drawRect(w, cx-205.f, cy-28.f, 410.f, 240.f, {14,16,28}, {50,38,62}, 2.f);
 
-    drawText(w, font, "КОНЕЦ ИГРЫ",                     cx, cy,       42, {230,80,80},  true);
-    drawText(w, font, "Счёт: "+std::to_string(g.score), cx, cy+52.f,  24, {200,205,225},true);
+    drawText(w, font, "КОНЕЦ ИГРЫ",                     cx, cy,       20, {230,80,80},  true);
+    drawText(w, font, "Счёт: "+std::to_string(g.score), cx, cy+40.f,  14, {200,205,225},true);
 
-    // Топ-3
-    drawText(w, font, "Лучшие результаты:", cx, cy+92.f, 13, {100,105,135}, true);
+    drawText(w, font, "Лучшие результаты:", cx, cy+80.f, 10, {100,105,135}, true);
     int show = std::min((int)recs.size(), 3);
     for (int i = 0; i < show; i++) {
         sf::Color col = (i==0 ? sf::Color{228,182,48} : sf::Color{160,165,185});
         std::string line = std::to_string(i+1)+".  "+recs[i].diff
                           +"   "+std::to_string(recs[i].score);
-        drawText(w, font, line, cx, cy+112.f+i*20.f, 12, col, true);
+        drawText(w, font, line, cx, cy+102.f+i*22.f, 9, col, true);
     }
 
-    // Кнопки с мышью
     const std::string btnLabels[] = { "Играть снова", "В меню" };
     for (int i = 0; i < 2; i++) {
         auto rect = gameOverButtonRect(i);
@@ -571,7 +542,7 @@ void renderGameOver(sf::RenderWindow& w, const sf::Font& font,
         sf::Color tc  = hov ? sf::Color{72,230,95} : sf::Color{155,160,180};
         drawRect(w, rect.left, rect.top, rect.width, rect.height, bg, brd, hov?2.f:1.f);
         drawText(w, font, btnLabels[i],
-                 rect.left+rect.width/2.f, rect.top+rect.height/2.f, 16, tc, true);
+                 rect.left+rect.width/2.f, rect.top+rect.height/2.f, 11, tc, true);
     }
 }
 
@@ -589,10 +560,10 @@ void renderLoadSelect(sf::RenderWindow& w, const sf::Font& font,
 
     float cx = WIN_W / 2.f, cy = WIN_H / 2.f;
 
-    drawText(w, font, "ЗАГРУЗИТЬ ИГРУ", cx, cy-170.f, 36, {72,230,95}, true);
-    drawText(w, font, "Выберите слот",  cx, cy-128.f, 15, {120,125,155}, true);
+    drawText(w, font, "ЗАГРУЗИТЬ ИГРУ", cx, cy-170.f, 20, {72,230,95}, true);
+    drawText(w, font, "Выберите слот",  cx, cy-140.f, 11, {120,125,155}, true);
 
-    sf::Vertex s1[] = { {{cx-200.f,cy-108.f},{35,38,62}}, {{cx+200.f,cy-108.f},{35,38,62}} };
+    sf::Vertex s1[] = { {{cx-200.f,cy-118.f},{35,38,62}}, {{cx+200.f,cy-118.f},{35,38,62}} };
     w.draw(s1, 2, sf::Lines);
 
     for (int i = 0; i < 3; i++) {
@@ -600,31 +571,29 @@ void renderLoadSelect(sf::RenderWindow& w, const sf::Font& font,
         const auto& si = slotInfos[i];
 
         drawRect(w, cx-210.f, ry, 380.f, 44.f, {18,20,36}, {35,38,62}, 1.f);
-        drawText(w, font, "Слот "+std::to_string(i+1), cx-200.f, ry+13.f, 12, {100,105,135});
+        drawText(w, font, "Слот "+std::to_string(i+1), cx-200.f, ry+14.f, 10, {100,105,135});
 
         std::string info = si.exists
             ? si.diff + "  /  " + std::to_string(si.score) + " оч."
             : "Пусто";
-        drawText(w, font, info, cx-148.f, ry+13.f, 13,
+        drawText(w, font, info, cx-148.f, ry+14.f, 10,
                  si.exists ? sf::Color{160,165,185} : sf::Color{105,110,140});
 
-        // Кнопка загрузки
         auto ar = pauseSlotActionRect(i);
         bool ahov = ar.contains((float)mousePos.x, (float)mousePos.y);
         if (si.exists) {
-            drawButton(w, font, ar, "Загрузить", {80,180,230}, false, ahov, 12);
+            drawButton(w, font, ar, "Загрузить", {80,180,230}, false, ahov, 10);
         } else {
             drawRect(w, ar.left, ar.top, ar.width, ar.height, {18,20,36}, {30,33,55}, 1.f);
-            drawText(w, font, "Пусто", ar.left+ar.width/2.f, ar.top+ar.height/2.f, 12, {105,110,140}, true);
+            drawText(w, font, "Пусто", ar.left+ar.width/2.f, ar.top+ar.height/2.f, 10, {105,110,140}, true);
         }
 
-        // Кнопка удаления
         if (si.exists) {
             auto dr = pauseSlotDeleteRect(i);
             bool dhov = dr.contains((float)mousePos.x, (float)mousePos.y);
             sf::Color dc = dhov ? sf::Color{230,80,80} : sf::Color{140,60,60};
             drawRect(w, dr.left, dr.top, dr.width, dr.height, {30,12,12}, dc, dhov?2.f:1.f);
-            drawText(w, font, "X", dr.left+dr.width/2.f, dr.top+dr.height/2.f, 14, dc, true);
+            drawText(w, font, "X", dr.left+dr.width/2.f, dr.top+dr.height/2.f, 12, dc, true);
         }
     }
 
@@ -633,13 +602,13 @@ void renderLoadSelect(sf::RenderWindow& w, const sf::Font& font,
 
     auto br = pauseBackRect();
     drawButton(w, font, br, "<  Назад", {160,165,185}, false,
-               br.contains((float)mousePos.x,(float)mousePos.y), 15);
+               br.contains((float)mousePos.x,(float)mousePos.y), 11);
 
     if (!notif.empty()) {
         bool err = notif.find("Нет") != std::string::npos;
         sf::Color c = err ? sf::Color{230,80,80} : sf::Color{72,230,95};
-        drawRect(w, cx-145.f, cy+122.f, 290.f, 28.f, {14,16,28,210}, c, 1.f);
-        drawText(w, font, notif, cx, cy+122.f, 13, c, true);
+        drawRect(w, cx-145.f, cy+122.f, 290.f, 30.f, {14,16,28,210}, c, 1.f);
+        drawText(w, font, notif, cx, cy+125.f, 10, c, true);
     }
 }
 
@@ -654,23 +623,23 @@ void renderRecords(sf::RenderWindow& w, const sf::Font& font,
     drawBgGrid(w);
 
     float cx = WIN_W / 2.f;
-    drawText(w, font, "ТАБЛИЦА РЕКОРДОВ", cx, 40.f, 36, {72,230,95}, true);
-    drawText(w, font, "Esc / R — назад",  cx, 88.f, 16, {130,135,165}, true);
+    drawText(w, font, "ТАБЛИЦА РЕКОРДОВ", cx, 40.f, 20, {72,230,95}, true);
+    drawText(w, font, "Esc / R — назад",  cx, 80.f, 10, {130,135,165}, true);
 
     if (recs.empty()) {
-        drawText(w, font, "Рекордов пока нет", cx, WIN_H/2.f, 22, {120,125,155}, true);
+        drawText(w, font, "Рекордов пока нет", cx, WIN_H/2.f, 12, {120,125,155}, true);
         return;
     }
 
-    float startY = 125.f, lx = cx - 280.f;
-    drawText(w, font, "#",          lx,        startY, 14, {110,115,145});
-    drawText(w, font, "Дата",       lx+40.f,   startY, 14, {110,115,145});
-    drawText(w, font, "Сложность",  lx+200.f,  startY, 14, {110,115,145});
-    drawText(w, font, "Счёт",       lx+400.f,  startY, 14, {110,115,145});
-    startY += 22.f;
+    float startY = 118.f, lx = cx - 280.f;
+    drawText(w, font, "#",          lx,        startY, 10, {110,115,145});
+    drawText(w, font, "Дата",       lx+40.f,   startY, 10, {110,115,145});
+    drawText(w, font, "Сложность",  lx+200.f,  startY, 10, {110,115,145});
+    drawText(w, font, "Счёт",       lx+400.f,  startY, 10, {110,115,145});
+    startY += 20.f;
     sf::Vertex sep[] = { {{lx,startY},{35,38,62}}, {{lx+560.f,startY},{35,38,62}} };
     w.draw(sep, 2, sf::Lines);
-    startY += 10.f;
+    startY += 8.f;
 
     int show = std::min((int)recs.size(), 10);
     for (int i = 0; i < show; i++) {
@@ -678,12 +647,11 @@ void renderRecords(sf::RenderWindow& w, const sf::Font& font,
                          i <3 ? sf::Color{200,205,225} :
                                 sf::Color{120,125,155});
         float ry = startY + i*26.f;
-        drawText(w, font, std::to_string(i+1),           lx,        ry, 14, col);
-        drawText(w, font, recs[i].date,                  lx+40.f,   ry, 14, col);
-        drawText(w, font, recs[i].diff,                  lx+200.f,  ry, 14, col);
-        // Значок ИИ рядом со сложностью
+        drawText(w, font, std::to_string(i+1),           lx,        ry, 10, col);
+        drawText(w, font, recs[i].date,                  lx+40.f,   ry, 10, col);
+        drawText(w, font, recs[i].diff,                  lx+200.f,  ry, 10, col);
         if (recs[i].isAI)
-            drawText(w, font, "[ИИ]", lx+320.f, ry, 12, {80,180,230});
-        drawText(w, font, std::to_string(recs[i].score), lx+400.f,  ry, 14, col);
+            drawText(w, font, "[ИИ]", lx+320.f, ry, 9, {80,180,230});
+        drawText(w, font, std::to_string(recs[i].score), lx+400.f,  ry, 10, col);
     }
 }
