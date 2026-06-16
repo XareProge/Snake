@@ -8,11 +8,41 @@
 
 static const std::string SAVE_FILE = "save.txt";
 
+// Генерация иконки окна 32x32 — S-образная змейка на тёмном фоне
+static sf::Image createSnakeIcon() {
+    sf::Image img;
+    img.create(32, 32, sf::Color(10, 12, 22, 255));
+    sf::Color g{72, 230, 95, 255};  // зелёный
+    sf::Color bg{10, 12, 22, 255};  // фон (для глаз)
+
+    for (int y = 0; y < 32; y++) {
+        for (int x = 0; x < 32; x++) {
+            bool snake =
+                (x>=4 && x<=27 && y>=3  && y<=9)  ||  // верхний сегмент
+                (x>=21&& x<=27 && y>=9  && y<=16) ||  // правый поворот вниз
+                (x>=4 && x<=27 && y>=10 && y<=16) ||  // средний сегмент
+                (x>=4 && x<=10 && y>=16 && y<=23) ||  // левый поворот вниз
+                (x>=4 && x<=27 && y>=17 && y<=23);    // нижний сегмент
+            if (!snake) continue;
+            // Два глаза в правой части верхнего сегмента (голова)
+            bool eye = (x>=20 && x<=22 && y>=4 && y<=6) ||
+                       (x>=24 && x<=26 && y>=4 && y<=6);
+            img.setPixel(x, y, eye ? bg : g);
+        }
+    }
+    return img;
+}
+
 int main() {
+    static const std::string TITLE = "Змейка";
     sf::RenderWindow window(
-        sf::VideoMode(WIN_W, WIN_H), L"Змейка",
+        sf::VideoMode(WIN_W, WIN_H),
+        sf::String::fromUtf8(TITLE.begin(), TITLE.end()),
         sf::Style::Titlebar | sf::Style::Close);
     window.setFramerateLimit(120);
+
+    // Установка иконки окна
+    { auto icon = createSnakeIcon(); window.setIcon(32, 32, icon.getPixelsPtr()); }
 
     // Загрузка шрифта с поддержкой кириллицы
     sf::Font font;
