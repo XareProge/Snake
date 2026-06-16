@@ -1,4 +1,5 @@
 #pragma once
+#include <SFML/Window/Keyboard.hpp>
 #include <deque>
 #include <vector>
 #include <random>

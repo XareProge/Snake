@@ -1,5 +1,4 @@
 #include "Game.h"
-#include <SFML/Window/Keyboard.hpp>
 #include <algorithm>
 #include <ctime>
 
