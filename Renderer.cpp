@@ -118,7 +118,8 @@ static void drawBgGrid(sf::RenderWindow& w) {
 // ════════════════════════════════════════════════════════════════
 
 void renderMenu(sf::RenderWindow& w, const sf::Font& font,
-                int selected, sf::Vector2i mousePos)
+                int selected, sf::Vector2i mousePos,
+                const std::string& notif)
 {
     w.clear({ 10, 12, 22 });
     drawBgGrid(w);
@@ -139,6 +140,13 @@ void renderMenu(sf::RenderWindow& w, const sf::Font& font,
         auto rect = menuButtonRect(i);
         bool hov  = rect.contains((float)mousePos.x, (float)mousePos.y);
         drawButton(w, font, rect, labels[i], colors[i], selected == i, hov, 20);
+    }
+
+    // Ошибка загрузки: красная плашка над подсказкой
+    if (!notif.empty()) {
+        float ny = WIN_H - 65.f;
+        drawRect(w, cx - 185.f, ny - 7.f, 370.f, 34.f, {40,10,10,220}, {230,80,80}, 1.5f);
+        drawText(w, font, notif, cx, ny, 15, {230,80,80}, true);
     }
 
     drawText(w, font, "стрелки / WASD — выбор       Enter — подтвердить",
@@ -364,12 +372,12 @@ static void drawUI(sf::RenderWindow& w, const sf::Font& font,
     {
         auto sr = saveButtonRect();
         bool hov = sr.contains((float)mousePos.x, (float)mousePos.y);
-        drawButton(w, font, sr, "Сохранить  [S]", {72,230,95}, false, hov, 14);
+        drawButton(w, font, sr, "Сохранить  [F5]", {72,230,95}, false, hov, 14);
     }
     {
         auto lr = loadButtonRect();
         bool hov = lr.contains((float)mousePos.x, (float)mousePos.y);
-        drawButton(w, font, lr, "Загрузить  [L]", {72,230,95}, false, hov, 14);
+        drawButton(w, font, lr, "Загрузить  [F6]", {72,230,95}, false, hov, 14);
     }
 
     // Подсказки
@@ -469,7 +477,7 @@ void renderRecords(sf::RenderWindow& w, const sf::Font& font,
     drawText(w, font, "#",          lx,        startY, 14, {55,60,85});
     drawText(w, font, "Дата",       lx+40.f,   startY, 14, {55,60,85});
     drawText(w, font, "Сложность",  lx+200.f,  startY, 14, {55,60,85});
-    drawText(w, font, "Счёт",       lx+370.f,  startY, 14, {55,60,85});
+    drawText(w, font, "Счёт",       lx+400.f,  startY, 14, {55,60,85});
     startY += 22.f;
     sf::Vertex sep[] = { {{lx,startY},{35,38,62}}, {{lx+560.f,startY},{35,38,62}} };
     w.draw(sep, 2, sf::Lines);
@@ -481,9 +489,12 @@ void renderRecords(sf::RenderWindow& w, const sf::Font& font,
                          i <3 ? sf::Color{200,205,225} :
                                 sf::Color{95,100,125});
         float ry = startY + i*26.f;
-        drawText(w, font, std::to_string(i+1),          lx,        ry, 14, col);
-        drawText(w, font, recs[i].date,                 lx+40.f,   ry, 14, col);
-        drawText(w, font, recs[i].diff,                 lx+200.f,  ry, 14, col);
-        drawText(w, font, std::to_string(recs[i].score),lx+370.f,  ry, 14, col);
+        drawText(w, font, std::to_string(i+1),           lx,        ry, 14, col);
+        drawText(w, font, recs[i].date,                  lx+40.f,   ry, 14, col);
+        drawText(w, font, recs[i].diff,                  lx+200.f,  ry, 14, col);
+        // Значок ИИ рядом со сложностью
+        if (recs[i].isAI)
+            drawText(w, font, "[ИИ]", lx+320.f, ry, 12, {80,180,230});
+        drawText(w, font, std::to_string(recs[i].score), lx+400.f,  ry, 14, col);
     }
 }

@@ -8,14 +8,19 @@ std::vector<Record> loadRecords() {
     std::ifstream file("records.txt");
     std::string line;
 
-    // Формат строки: дата|сложность|счёт
+    // Формат строки: дата|сложность|счёт|аи (4-е поле необязательно — совместимость с v3.0)
     while (std::getline(file, line)) {
         if (line.empty()) continue;
         std::istringstream ss(line);
         Record r;
-        std::getline(ss, r.date, '|');
-        std::getline(ss, r.diff, '|');
-        ss >> r.score;
+        std::getline(ss, r.date,  '|');
+        std::getline(ss, r.diff,  '|');
+        std::string scoreStr;
+        std::getline(ss, scoreStr, '|');
+        r.score = scoreStr.empty() ? 0 : std::stoi(scoreStr);
+        std::string aiStr;
+        if (std::getline(ss, aiStr, '|'))
+            r.isAI = (aiStr == "1");
         recs.push_back(r);
     }
 
@@ -28,5 +33,5 @@ std::vector<Record> loadRecords() {
 
 void saveRecord(const Record& r) {
     std::ofstream file("records.txt", std::ios::app);
-    file << r.date << "|" << r.diff << "|" << r.score << "\n";
+    file << r.date << "|" << r.diff << "|" << r.score << "|" << (r.isAI ? "1" : "0") << "\n";
 }

@@ -28,8 +28,10 @@ int main() {
     std::unique_ptr<Game>   game;
     std::vector<Record>     records   = loadRecords();
     std::vector<Pt>         aiPath;           // путь ИИ для визуализации
-    std::string             notif;            // текст уведомления (сохранено/загружено)
-    sf::Clock               notifClock;       // таймер уведомления
+    std::string             notif;            // текст уведомления в игре (сохранено/загружено)
+    sf::Clock               notifClock;       // таймер уведомления в игре
+    std::string             menuNotif;        // текст ошибки в главном меню
+    sf::Clock               menuNotifClock;   // таймер ошибки меню
     sf::Clock               tickClock;
 
     // ─── Главный цикл ────────────────────────────────────────────
@@ -55,13 +57,16 @@ int main() {
                         if      (menuSel == 0) { aiPending = false; state = State::DIFFICULTY; diffSel = 0; }
                         else if (menuSel == 1) { aiPending = true;  state = State::DIFFICULTY; diffSel = 0; }
                         else if (menuSel == 2) {
-                            // Загрузить сохранённую игру
+                            // Загрузить сохранённую игру (показать ошибку если файла нет)
                             auto loaded = std::make_unique<Game>(Diff::HARMLESS);
                             if (loaded->loadFromFile(SAVE_FILE)) {
                                 game = std::move(loaded);
                                 aiPath.clear();
                                 tickClock.restart();
                                 state = State::PLAYING;
+                            } else {
+                                menuNotif = "Нет файла сохранения!";
+                                menuNotifClock.restart();
                             }
                         }
                         else if (menuSel == 3) { records = loadRecords(); state = State::RECORDS; }
@@ -85,21 +90,24 @@ int main() {
                 else if (state == State::PLAYING) {
                     if (k == sf::Keyboard::Escape) { state = State::MENU; menuSel = 0; }
                     if (k == sf::Keyboard::R)      { records = loadRecords(); state = State::RECORDS; }
-                    // Сохранение
-                    if (k == sf::Keyboard::S && game) {
+                    // Сохранение (F5)
+                    if (k == sf::Keyboard::F5 && game) {
                         if (game->saveToFile(SAVE_FILE)) {
                             notif = "Игра сохранена!";
                             notifClock.restart();
                         }
                     }
-                    // Загрузка
-                    if (k == sf::Keyboard::L && game) {
+                    // Загрузка (F6)
+                    if (k == sf::Keyboard::F6 && game) {
                         auto loaded = std::make_unique<Game>(Diff::HARMLESS);
                         if (loaded->loadFromFile(SAVE_FILE)) {
                             game = std::move(loaded);
                             aiPath.clear();
                             tickClock.restart();
                             notif = "Игра загружена!";
+                            notifClock.restart();
+                        } else {
+                            notif = "Нет файла сохранения!";
                             notifClock.restart();
                         }
                     }
@@ -139,6 +147,9 @@ int main() {
                                 game = std::move(loaded);
                                 aiPath.clear(); tickClock.restart();
                                 state = State::PLAYING;
+                            } else {
+                                menuNotif = "Нет файла сохранения!";
+                                menuNotifClock.restart();
                             }
                         }
                         else if (i == 3) { records = loadRecords(); state = State::RECORDS; }
@@ -204,23 +215,26 @@ int main() {
             tickClock.restart();
 
             if (!game->alive) {
-                saveRecord({ currentDate(), diffName(game->diff), game->score });
+                saveRecord({ currentDate(), diffName(game->diff), game->score, game->aiMode });
                 records = loadRecords();
                 aiPath.clear();
                 state = State::GAME_OVER;
             }
         }
 
-        // Скрываем уведомление через 2 секунды
+        // Скрываем игровое уведомление через 2 секунды
         if (!notif.empty() && notifClock.getElapsedTime().asSeconds() > 2.f)
             notif.clear();
+        // Скрываем ошибку меню через 2.5 секунды
+        if (!menuNotif.empty() && menuNotifClock.getElapsedTime().asSeconds() > 2.5f)
+            menuNotif.clear();
 
         // ── Отрисовка кадра ──────────────────────────────────────
         window.clear({ 10, 12, 22 });
 
         switch (state) {
             case State::MENU:
-                renderMenu(window, font, menuSel, mousePos);
+                renderMenu(window, font, menuSel, mousePos, menuNotif);
                 break;
             case State::DIFFICULTY:
                 renderDifficulty(window, font, diffSel, mousePos, aiPending);
