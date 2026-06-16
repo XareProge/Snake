@@ -326,15 +326,15 @@ static void drawUI(sf::RenderWindow& w, const sf::Font& font,
         drawText(w, font, diffName(g.diff), cx, 50.f, 8, dc, true);
     }
 
-    // Блок счёта
+    // Блок счёта (y=80, h=80, центр=120; группа 16+8+24=48px → старт 96)
     drawRect(w, ox+12.f, 80.f, UI_W-24.f, 80.f, {20,22,40});
-    drawText(w, font, "СЧЁТ",                  cx,  94.f, 16, {120,125,155}, true);
-    drawText(w, font, std::to_string(g.score), cx, 126.f, 24, {255,255,255}, true);
+    drawText(w, font, "СЧЁТ",                  cx, 104.f, 16, {120,125,155}, true);
+    drawText(w, font, std::to_string(g.score), cx, 132.f, 24, {255,255,255}, true);
 
-    // Блок длины
+    // Блок длины (y=172, h=64, центр=204; группа 16+8+16=40px → старт 184)
     drawRect(w, ox+12.f, 172.f, UI_W-24.f, 64.f, {20,22,40});
-    drawText(w, font, "ДЛИНА",                        cx, 184.f, 16, {120,125,155}, true);
-    drawText(w, font, std::to_string(g.snake.size()), cx, 210.f, 16, {200,205,225}, true);
+    drawText(w, font, "ДЛИНА",                        cx, 192.f, 16, {120,125,155}, true);
+    drawText(w, font, std::to_string(g.snake.size()), cx, 216.f, 16, {200,205,225}, true);
 
     // Инверсия
     if (g.invCtrl) {
