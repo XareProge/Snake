@@ -381,10 +381,13 @@ static void drawUI(sf::RenderWindow& w, const sf::Font& font,
 
     // Подсказки
     float hy = WIN_H - 60.f;
-    drawText(w, font, "Esc — пауза      R — рекорды",
-             cx, hy, 12, {120,125,155}, true);
-    drawText(w, font, "F5 — сохранить   F6 — загрузить",
-             cx, hy + 17.f, 12, {120,125,155}, true);
+    const char* hints[] = {
+        "WASD / стрелки", "Esc — пауза",
+        "R — рекорды",    "F5 — сохранить", "F6 — загрузить"
+    };
+    float hy0 = WIN_H - 92.f;
+    for (int i = 0; i < 5; i++)
+        drawText(w, font, hints[i], cx, hy0 + i * 16.f, 12, {120,125,155}, true);
 }
 
 void renderGame(sf::RenderWindow& w, const sf::Font& font,
