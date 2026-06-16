@@ -25,9 +25,24 @@ sf::FloatRect gameOverButtonRect(int i) {
 }
 
 sf::FloatRect pauseButtonRect(int i) {
-    // 5 кнопок по центру экрана
     float cx = WIN_W / 2.f, cy = WIN_H / 2.f;
     return { cx - 145.f, cy - 90.f + i * 56.f, 290.f, 46.f };
+}
+
+// Слот-панель паузы: строки слотов начинаются с cy-102, шаг 56px
+sf::FloatRect pauseSlotActionRect(int slot) {
+    float cx = WIN_W / 2.f, cy = WIN_H / 2.f;
+    return { cx + 74.f, cy - 96.f + slot * 56.f, 100.f, 34.f };
+}
+
+sf::FloatRect pauseSlotDeleteRect(int slot) {
+    float cx = WIN_W / 2.f, cy = WIN_H / 2.f;
+    return { cx + 180.f, cy - 96.f + slot * 56.f, 34.f, 34.f };
+}
+
+sf::FloatRect pauseBackRect() {
+    float cx = WIN_W / 2.f, cy = WIN_H / 2.f;
+    return { cx - 82.f, cy + 76.f, 164.f, 38.f };
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -403,44 +418,115 @@ void renderGame(sf::RenderWindow& w, const sf::Font& font,
 
 void renderPause(sf::RenderWindow& w, const sf::Font& font,
                  const Game& g, const std::string& notif,
+                 PausePanel panel, const SaveSlotInfo slotInfos[3],
                  sf::Vector2i mousePos)
 {
-    // Полупрозрачный оверлей
     drawRect(w, 0, 0, (float)WIN_W, (float)WIN_H, {0,0,0,160});
-
     float cx = WIN_W / 2.f, cy = WIN_H / 2.f;
 
-    // Панель паузы
-    drawRect(w, cx-170.f, cy-118.f, 340.f, 310.f, {14,16,28}, {50,55,80}, 2.f);
+    if (panel == PausePanel::NONE) {
+        // ── Главное меню паузы ──────────────────────────────
+        drawRect(w, cx-170.f, cy-118.f, 340.f, 310.f, {14,16,28}, {50,55,80}, 2.f);
+        drawText(w, font, "ПАУЗА",                          cx, cy-108.f, 36, {72,230,95},    true);
+        drawText(w, font, "Счёт: "+std::to_string(g.score), cx, cy-70.f,  16, {160,165,185},  true);
+        sf::Vertex sep[] = { {{cx-140.f,cy-50.f},{35,38,62}}, {{cx+140.f,cy-50.f},{35,38,62}} };
+        w.draw(sep, 2, sf::Lines);
+        const std::string labels[] = {
+            "Продолжить", "Рестарт", "Сохранить  [F5]", "Загрузить  [F6]", "Главное меню"
+        };
+        const sf::Color colors[] = {
+            {72,230,95}, {228,182,48}, {72,230,95}, {72,230,95}, {160,165,185}
+        };
+        for (int i = 0; i < 5; i++) {
+            auto r = pauseButtonRect(i);
+            drawButton(w, font, r, labels[i], colors[i], false,
+                       r.contains((float)mousePos.x,(float)mousePos.y), 16);
+        }
+    } else {
+        // ── Панель выбора слота ──────────────────────────────
+        drawRect(w, cx-220.f, cy-180.f, 440.f, 380.f, {14,16,28}, {50,55,80}, 2.f);
+        drawText(w, font, "ПАУЗА", cx, cy-170.f, 28, {72,230,95}, true);
 
-    drawText(w, font, "ПАУЗА", cx, cy-108.f, 36, {72,230,95}, true);
-    drawText(w, font, "Счёт: "+std::to_string(g.score), cx, cy-70.f, 16, {160,165,185}, true);
+        bool saving = (panel == PausePanel::SAVING);
+        drawText(w, font,
+                 saving ? "Выберите слот для сохранения" : "Выберите слот для загрузки",
+                 cx, cy-138.f, 14, {95,100,125}, true);
 
-    // Разделитель
-    sf::Vertex sep[] = { {{cx-140.f, cy-50.f},{35,38,62}},
-                         {{cx+140.f, cy-50.f},{35,38,62}} };
-    w.draw(sep, 2, sf::Lines);
+        sf::Vertex s1[] = { {{cx-200.f,cy-118.f},{35,38,62}}, {{cx+200.f,cy-118.f},{35,38,62}} };
+        w.draw(s1, 2, sf::Lines);
 
-    const std::string labels[] = {
-        "Продолжить", "Рестарт", "Сохранить  [F5]", "Загрузить  [F6]", "Главное меню"
-    };
-    const sf::Color colors[] = {
-        {72,230,95}, {228,182,48}, {72,230,95}, {72,230,95}, {160,165,185}
-    };
-    for (int i = 0; i < 5; i++) {
-        auto rect = pauseButtonRect(i);
-        bool hov  = rect.contains((float)mousePos.x, (float)mousePos.y);
-        drawButton(w, font, rect, labels[i], colors[i], false, hov, 16);
+        for (int i = 0; i < 3; i++) {
+            float ry = cy - 102.f + i * 56.f;
+            const auto& si = slotInfos[i];
+
+            drawRect(w, cx-210.f, ry, 380.f, 44.f, {20,22,40}, {35,38,62}, 1.f);
+            drawText(w, font, "Слот "+std::to_string(i+1), cx-200.f, ry+13.f, 12, {55,60,85});
+
+            std::string info = si.exists
+                ? si.diff + "  /  " + std::to_string(si.score) + " оч."
+                : "Пусто";
+            drawText(w, font, info, cx-148.f, ry+13.f, 13,
+                     si.exists ? sf::Color{160,165,185} : sf::Color{50,55,75});
+
+            // Кнопка действия
+            auto ar = pauseSlotActionRect(i);
+            bool ahov = ar.contains((float)mousePos.x, (float)mousePos.y);
+            if (saving || si.exists) {
+                sf::Color ac = saving ? sf::Color{72,230,95} : sf::Color{80,180,230};
+                drawButton(w, font, ar, saving ? "Сохранить" : "Загрузить", ac, false, ahov, 12);
+            } else {
+                drawRect(w, ar.left, ar.top, ar.width, ar.height, {18,20,36}, {30,33,55}, 1.f);
+                drawText(w, font, "Пусто", ar.left+ar.width/2.f, ar.top+ar.height/2.f,
+                         12, {40,45,65}, true);
+            }
+
+            // Кнопка удаления
+            if (si.exists) {
+                auto dr = pauseSlotDeleteRect(i);
+                bool dhov = dr.contains((float)mousePos.x, (float)mousePos.y);
+                sf::Color dc = dhov ? sf::Color{230,80,80} : sf::Color{140,60,60};
+                drawRect(w, dr.left, dr.top, dr.width, dr.height, {30,12,12}, dc, dhov?2.f:1.f);
+                drawText(w, font, "X", dr.left+dr.width/2.f, dr.top+dr.height/2.f, 14, dc, true);
+            }
+        }
+
+        sf::Vertex s2[] = { {{cx-200.f,cy+68.f},{35,38,62}}, {{cx+200.f,cy+68.f},{35,38,62}} };
+        w.draw(s2, 2, sf::Lines);
+
+        auto br = pauseBackRect();
+        drawButton(w, font, br, "<  Назад", {160,165,185}, false,
+                   br.contains((float)mousePos.x,(float)mousePos.y), 15);
     }
 
-    // Уведомление (сохранено / ошибка) внутри панели
+    // Уведомление — всегда у нижнего края панели
     if (!notif.empty()) {
-        float ny = cy + 160.f;
         bool err = notif.find("Нет") != std::string::npos;
         sf::Color c = err ? sf::Color{230,80,80} : sf::Color{72,230,95};
-        drawRect(w, cx-135.f, ny-6.f, 270.f, 28.f, {14,16,28,200}, c, 1.f);
+        float ny = cy + (panel == PausePanel::NONE ? 160.f : 175.f);
+        drawRect(w, cx-145.f, ny-6.f, 290.f, 28.f, {14,16,28,210}, c, 1.f);
         drawText(w, font, notif, cx, ny, 13, c, true);
     }
+}
+
+// ════════════════════════════════════════════════════════════════
+// Обратный отсчёт (3-2-1) перед возобновлением игры
+// ════════════════════════════════════════════════════════════════
+
+void renderCountdown(sf::RenderWindow& w, const sf::Font& font, float elapsed) {
+    int num = 3 - (int)elapsed;
+    if (num <= 0) return;
+
+    // Плавное угасание в конце каждой секунды
+    float frac  = elapsed - (int)elapsed;
+    float alpha = frac < 0.55f ? 1.f : 1.f - (frac - 0.55f) / 0.45f;
+    uint8_t a   = (uint8_t)(alpha * 255.f);
+
+    float cx = (float)(COLS * CELL) / 2.f;
+    float cy = WIN_H / 2.f;
+
+    drawCircle(w, cx, cy, 50.f, {10,12,22, (uint8_t)(a * 0.85f)});
+    drawText(w, font, std::to_string(num), cx, cy, 88, {72,230,95,a}, true);
+    drawText(w, font, "Приготовься!", cx, cy+58.f, 14, {72,230,95, (uint8_t)(a*0.75f)}, true);
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -483,6 +569,74 @@ void renderGameOver(sf::RenderWindow& w, const sf::Font& font,
         drawRect(w, rect.left, rect.top, rect.width, rect.height, bg, brd, hov?2.f:1.f);
         drawText(w, font, btnLabels[i],
                  rect.left+rect.width/2.f, rect.top+rect.height/2.f, 16, tc, true);
+    }
+}
+
+// ════════════════════════════════════════════════════════════════
+// Выбор слота загрузки из главного меню
+// ════════════════════════════════════════════════════════════════
+
+void renderLoadSelect(sf::RenderWindow& w, const sf::Font& font,
+                      const SaveSlotInfo slotInfos[3],
+                      const std::string& notif,
+                      sf::Vector2i mousePos)
+{
+    w.clear({10,12,22});
+    drawBgGrid(w);
+
+    float cx = WIN_W / 2.f, cy = WIN_H / 2.f;
+
+    drawText(w, font, "ЗАГРУЗИТЬ ИГРУ", cx, cy-170.f, 36, {72,230,95}, true);
+    drawText(w, font, "Выберите слот",  cx, cy-128.f, 15, {95,100,125}, true);
+
+    sf::Vertex s1[] = { {{cx-200.f,cy-108.f},{35,38,62}}, {{cx+200.f,cy-108.f},{35,38,62}} };
+    w.draw(s1, 2, sf::Lines);
+
+    for (int i = 0; i < 3; i++) {
+        float ry = cy - 92.f + i * 56.f;
+        const auto& si = slotInfos[i];
+
+        drawRect(w, cx-210.f, ry, 380.f, 44.f, {18,20,36}, {35,38,62}, 1.f);
+        drawText(w, font, "Слот "+std::to_string(i+1), cx-200.f, ry+13.f, 12, {55,60,85});
+
+        std::string info = si.exists
+            ? si.diff + "  /  " + std::to_string(si.score) + " оч."
+            : "Пусто";
+        drawText(w, font, info, cx-148.f, ry+13.f, 13,
+                 si.exists ? sf::Color{160,165,185} : sf::Color{50,55,75});
+
+        // Кнопка загрузки
+        auto ar = pauseSlotActionRect(i);
+        bool ahov = ar.contains((float)mousePos.x, (float)mousePos.y);
+        if (si.exists) {
+            drawButton(w, font, ar, "Загрузить", {80,180,230}, false, ahov, 12);
+        } else {
+            drawRect(w, ar.left, ar.top, ar.width, ar.height, {18,20,36}, {30,33,55}, 1.f);
+            drawText(w, font, "Пусто", ar.left+ar.width/2.f, ar.top+ar.height/2.f, 12, {40,45,65}, true);
+        }
+
+        // Кнопка удаления
+        if (si.exists) {
+            auto dr = pauseSlotDeleteRect(i);
+            bool dhov = dr.contains((float)mousePos.x, (float)mousePos.y);
+            sf::Color dc = dhov ? sf::Color{230,80,80} : sf::Color{140,60,60};
+            drawRect(w, dr.left, dr.top, dr.width, dr.height, {30,12,12}, dc, dhov?2.f:1.f);
+            drawText(w, font, "X", dr.left+dr.width/2.f, dr.top+dr.height/2.f, 14, dc, true);
+        }
+    }
+
+    sf::Vertex s2[] = { {{cx-200.f,cy+68.f},{35,38,62}}, {{cx+200.f,cy+68.f},{35,38,62}} };
+    w.draw(s2, 2, sf::Lines);
+
+    auto br = pauseBackRect();
+    drawButton(w, font, br, "<  Назад", {160,165,185}, false,
+               br.contains((float)mousePos.x,(float)mousePos.y), 15);
+
+    if (!notif.empty()) {
+        bool err = notif.find("Нет") != std::string::npos;
+        sf::Color c = err ? sf::Color{230,80,80} : sf::Color{72,230,95};
+        drawRect(w, cx-145.f, cy+122.f, 290.f, 28.f, {14,16,28,210}, c, 1.f);
+        drawText(w, font, notif, cx, cy+122.f, 13, c, true);
     }
 }
 

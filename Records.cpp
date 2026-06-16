@@ -7,7 +7,7 @@ static constexpr int MAX_RECORDS = 10;
 
 std::vector<Record> loadRecords() {
     std::vector<Record> recs;
-    std::ifstream file("records.txt");
+    std::ifstream file("saves/records.txt");
     std::string line;
 
     // Формат строки: дата|сложность|счёт|аи (4-е поле необязательно — совместимость с v3.0)
@@ -44,7 +44,7 @@ void saveRecord(const Record& r) {
     if ((int)recs.size() > MAX_RECORDS)
         recs.resize(MAX_RECORDS);
 
-    std::ofstream file("records.txt");
+    std::ofstream file("saves/records.txt");
     for (const auto& rec : recs)
         file << rec.date << "|" << rec.diff << "|" << rec.score << "|" << (rec.isAI ? "1" : "0") << "\n";
 }

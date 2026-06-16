@@ -12,6 +12,7 @@ constexpr int WIN_H = ROWS * CELL;
 // ─── Состояние игры ──────────────────────────────────────────────
 enum class State {
     MENU,         // главное меню
+    LOAD_SELECT,  // выбор слота загрузки из меню
     DIFFICULTY,   // выбор сложности
     PLAYING,      // игровой процесс
     PAUSED,       // пауза
@@ -47,6 +48,16 @@ struct Record {
     std::string diff;        // название сложности
     int         score = 0;
     bool        isAI  = false; // true = рекорд установлен ИИ
+};
+
+// ─── Подрежим паузы ──────────────────────────────────────────────
+enum class PausePanel { NONE, SAVING, LOADING };
+
+// ─── Информация о слоте сохранения ───────────────────────────────
+struct SaveSlotInfo {
+    bool        exists = false;
+    std::string diff;
+    int         score  = 0;
 };
 
 // ─── Вспомогательные функции ─────────────────────────────────────
