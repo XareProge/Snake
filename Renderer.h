@@ -10,14 +10,11 @@
 // Используются как для отрисовки (hover), так и для обработки кликов
 // ════════════════════════════════════════════════════════════════
 
-// Кнопки главного меню: 0=Начать, 1=Рекорды, 2=Выход
-sf::FloatRect menuButtonRect(int i);
-
-// Кнопки выбора сложности: 0=Безобидный … 3=Сложный
-sf::FloatRect diffButtonRect(int i);
-
-// Кнопки экрана конца игры: 0=Заново, 1=В меню
-sf::FloatRect gameOverButtonRect(int i);
+sf::FloatRect menuButtonRect(int i);        // 0=Начать, 1=ИИ, 2=Загрузить, 3=Рекорды, 4=Выход
+sf::FloatRect diffButtonRect(int i);        // 0=Безобидный … 3=Сложный
+sf::FloatRect gameOverButtonRect(int i);    // 0=Заново, 1=В меню
+sf::FloatRect saveButtonRect();             // кнопка «Сохранить» в панели
+sf::FloatRect loadButtonRect();             // кнопка «Загрузить» в панели
 
 
 // ════════════════════════════════════════════════════════════════
@@ -29,10 +26,15 @@ void renderMenu(sf::RenderWindow& w, const sf::Font& font,
                 int selected, sf::Vector2i mousePos);
 
 void renderDifficulty(sf::RenderWindow& w, const sf::Font& font,
-                      int selected, sf::Vector2i mousePos);
+                      int selected, sf::Vector2i mousePos, bool aiPending);
 
+// path — маршрут ИИ для визуализации (пустой если режим игрока)
+// notif — текст уведомления (пустой если нет)
 void renderGame(sf::RenderWindow& w, const sf::Font& font,
-                const Game& g);
+                const Game& g,
+                const std::vector<Pt>& path,
+                const std::string& notif,
+                sf::Vector2i mousePos);
 
 void renderGameOver(sf::RenderWindow& w, const sf::Font& font,
                     const Game& g, const std::vector<Record>& recs,
@@ -43,7 +45,7 @@ void renderRecords(sf::RenderWindow& w, const sf::Font& font,
 
 
 // ════════════════════════════════════════════════════════════════
-// Низкоуровневые примитивы (используются внутри Renderer.cpp)
+// Низкоуровневые примитивы
 // ════════════════════════════════════════════════════════════════
 
 sf::Color lerpColor(sf::Color a, sf::Color b, float t);
@@ -54,6 +56,5 @@ void drawRect(sf::RenderWindow& w, float x, float y, float wd, float ht,
 
 void drawCircle(sf::RenderWindow& w, float cx, float cy, float r, sf::Color fill);
 
-// fromUtf8 нужен для корректного отображения кириллицы
 void drawText(sf::RenderWindow& w, const sf::Font& f, const std::string& txt,
               float x, float y, unsigned sz, sf::Color col, bool center = false);
