@@ -60,6 +60,10 @@ Snake/
 ### Запуск
 Открой `Snake.sln` → конфигурация **Debug | x64** → **F5**
 
+## Авторы
+
+- [@XareProge](https://github.com/XareProge) — разработка
+
 ## Версии
 
 | Версия | Описание |
