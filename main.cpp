@@ -69,6 +69,7 @@ int main() {
     if (!font.loadFromFile("assets/PressStart2P.ttf"))
         if (!font.loadFromFile("C:/Windows/Fonts/consola.ttf"))
             font.loadFromFile("C:/Windows/Fonts/arial.ttf");
+    font.setSmooth(false);
 
     // ─── Состояние приложения ────────────────────────────────────
     State      state      = State::MENU;
