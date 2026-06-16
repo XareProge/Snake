@@ -483,7 +483,7 @@ void renderRecords(sf::RenderWindow& w, const sf::Font& font,
     w.draw(sep, 2, sf::Lines);
     startY += 10.f;
 
-    int show = std::min((int)recs.size(), 13);
+    int show = std::min((int)recs.size(), 10);
     for (int i = 0; i < show; i++) {
         sf::Color col = (i==0 ? sf::Color{228,182,48} :
                          i <3 ? sf::Color{200,205,225} :

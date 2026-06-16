@@ -3,6 +3,8 @@
 #include <sstream>
 #include <algorithm>
 
+static constexpr int MAX_RECORDS = 10;
+
 std::vector<Record> loadRecords() {
     std::vector<Record> recs;
     std::ifstream file("records.txt");
@@ -24,14 +26,25 @@ std::vector<Record> loadRecords() {
         recs.push_back(r);
     }
 
-    // Сортировка по убыванию счёта
     std::sort(recs.begin(), recs.end(), [](const Record& a, const Record& b) {
         return a.score > b.score;
     });
+    if ((int)recs.size() > MAX_RECORDS)
+        recs.resize(MAX_RECORDS);
     return recs;
 }
 
 void saveRecord(const Record& r) {
-    std::ofstream file("records.txt", std::ios::app);
-    file << r.date << "|" << r.diff << "|" << r.score << "|" << (r.isAI ? "1" : "0") << "\n";
+    // Загружаем, добавляем, сортируем, обрезаем до MAX_RECORDS, перезаписываем файл
+    auto recs = loadRecords();
+    recs.push_back(r);
+    std::sort(recs.begin(), recs.end(), [](const Record& a, const Record& b) {
+        return a.score > b.score;
+    });
+    if ((int)recs.size() > MAX_RECORDS)
+        recs.resize(MAX_RECORDS);
+
+    std::ofstream file("records.txt");
+    for (const auto& rec : recs)
+        file << rec.date << "|" << rec.diff << "|" << rec.score << "|" << (rec.isAI ? "1" : "0") << "\n";
 }
