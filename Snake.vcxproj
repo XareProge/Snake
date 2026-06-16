@@ -94,12 +94,14 @@
   <ItemGroup>
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Game.cpp" />
+    <ClCompile Include="AI.cpp" />
     <ClCompile Include="Records.cpp" />
     <ClCompile Include="Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Types.h" />
     <ClInclude Include="Game.h" />
+    <ClInclude Include="AI.h" />
     <ClInclude Include="Records.h" />
     <ClInclude Include="Renderer.h" />
   </ItemGroup>
