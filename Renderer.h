@@ -22,8 +22,10 @@ sf::FloatRect loadButtonRect();             // кнопка «Загрузить
 // mousePos передаётся для подсветки кнопок при наведении мыши
 // ════════════════════════════════════════════════════════════════
 
+// notif — строка ошибки (например «Нет файла сохранения!»), пустая если нет ошибки
 void renderMenu(sf::RenderWindow& w, const sf::Font& font,
-                int selected, sf::Vector2i mousePos);
+                int selected, sf::Vector2i mousePos,
+                const std::string& notif = "");
 
 void renderDifficulty(sf::RenderWindow& w, const sf::Font& font,
                       int selected, sf::Vector2i mousePos, bool aiPending);
