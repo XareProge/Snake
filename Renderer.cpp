@@ -161,7 +161,7 @@ void renderMenu(sf::RenderWindow& w, const sf::Font& font,
     }
 
     drawText(w, font, "стрелки / WASD — выбор       Enter — подтвердить",
-             cx, WIN_H - 30.f, 13, { 45, 50, 75 }, true);
+             cx, WIN_H - 32.f, 16, {130,135,165}, true);
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -209,7 +209,7 @@ void renderDifficulty(sf::RenderWindow& w, const sf::Font& font,
         drawText(w, font, descs[i], cx, rect.top + 34.f, 13, dc, true);
     }
 
-    drawText(w, font, "Esc — назад", cx, WIN_H - 30.f, 13, {45,50,75}, true);
+    drawText(w, font, "Esc — назад", cx, WIN_H - 32.f, 16, {130,135,165}, true);
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -344,12 +344,12 @@ static void drawUI(sf::RenderWindow& w, const sf::Font& font,
 
     // Счёт
     drawRect(w, ox+12.f, 98.f, UI_W-24.f, 78.f, {20,22,40});
-    drawText(w, font, "СЧЁТ",                  cx, 106.f, 16, {95,100,125}, true);
+    drawText(w, font, "СЧЁТ",                  cx, 106.f, 16, {120,125,155}, true);
     drawText(w, font, std::to_string(g.score), cx, 126.f, 38, {255,255,255}, true);
 
     // Длина
     drawRect(w, ox+12.f, 190.f, UI_W-24.f, 68.f, {20,22,40});
-    drawText(w, font, "ДЛИНА",                         cx, 198.f, 16, {95,100,125}, true);
+    drawText(w, font, "ДЛИНА",                         cx, 198.f, 16, {120,125,155}, true);
     drawText(w, font, std::to_string(g.snake.size()),  cx, 218.f, 28, {200,205,225}, true);
 
     // Инверсия
@@ -361,7 +361,7 @@ static void drawUI(sf::RenderWindow& w, const sf::Font& font,
     // Легенда (для сложностей с особыми объектами)
     if (g.diff >= Diff::MEDIUM) {
         float ly = 322.f;
-        drawText(w, font, "ОБЪЕКТЫ", cx, ly, 12, {55,60,85}, true);
+        drawText(w, font, "ОБЪЕКТЫ", cx, ly, 12, {100,105,135}, true);
         ly += 20.f;
         drawCircle(w, ox+22.f, ly+6.f, 5.f, {168,48,230});
         drawText(w, font, "яд  -15 очков", ox+34.f, ly, 11, {160,165,185});
@@ -381,10 +381,10 @@ static void drawUI(sf::RenderWindow& w, const sf::Font& font,
 
     // Подсказки
     float hy = WIN_H - 60.f;
-    drawText(w, font, "WASD/стрелки  Esc-пауза  R-рекорды",
-             cx, hy, 11, {55,60,85}, true);
-    drawText(w, font, "F5-сохранить  F6-загрузить",
-             cx, hy + 18.f, 11, {55,60,85}, true);
+    drawText(w, font, "WASD / стрелки   Esc-пауза   R-рекорды",
+             cx, hy, 13, {120,125,155}, true);
+    drawText(w, font, "F5 — сохранить       F6 — загрузить",
+             cx, hy + 19.f, 13, {120,125,155}, true);
 }
 
 void renderGame(sf::RenderWindow& w, const sf::Font& font,
@@ -450,7 +450,7 @@ void renderPause(sf::RenderWindow& w, const sf::Font& font,
         bool saving = (panel == PausePanel::SAVING);
         drawText(w, font,
                  saving ? "Выберите слот для сохранения" : "Выберите слот для загрузки",
-                 cx, cy-138.f, 14, {95,100,125}, true);
+                 cx, cy-138.f, 14, {120,125,155}, true);
 
         sf::Vertex s1[] = { {{cx-200.f,cy-118.f},{35,38,62}}, {{cx+200.f,cy-118.f},{35,38,62}} };
         w.draw(s1, 2, sf::Lines);
@@ -460,7 +460,7 @@ void renderPause(sf::RenderWindow& w, const sf::Font& font,
             const auto& si = slotInfos[i];
 
             drawRect(w, cx-210.f, ry, 380.f, 44.f, {20,22,40}, {35,38,62}, 1.f);
-            drawText(w, font, "Слот "+std::to_string(i+1), cx-200.f, ry+13.f, 12, {55,60,85});
+            drawText(w, font, "Слот "+std::to_string(i+1), cx-200.f, ry+13.f, 12, {100,105,135});
 
             std::string info = si.exists
                 ? si.diff + "  /  " + std::to_string(si.score) + " оч."
@@ -549,7 +549,7 @@ void renderGameOver(sf::RenderWindow& w, const sf::Font& font,
     drawText(w, font, "Счёт: "+std::to_string(g.score), cx, cy+52.f,  24, {200,205,225},true);
 
     // Топ-3
-    drawText(w, font, "Лучшие результаты:", cx, cy+92.f, 13, {55,60,85}, true);
+    drawText(w, font, "Лучшие результаты:", cx, cy+92.f, 13, {100,105,135}, true);
     int show = std::min((int)recs.size(), 3);
     for (int i = 0; i < show; i++) {
         sf::Color col = (i==0 ? sf::Color{228,182,48} : sf::Color{160,165,185});
@@ -587,7 +587,7 @@ void renderLoadSelect(sf::RenderWindow& w, const sf::Font& font,
     float cx = WIN_W / 2.f, cy = WIN_H / 2.f;
 
     drawText(w, font, "ЗАГРУЗИТЬ ИГРУ", cx, cy-170.f, 36, {72,230,95}, true);
-    drawText(w, font, "Выберите слот",  cx, cy-128.f, 15, {95,100,125}, true);
+    drawText(w, font, "Выберите слот",  cx, cy-128.f, 15, {120,125,155}, true);
 
     sf::Vertex s1[] = { {{cx-200.f,cy-108.f},{35,38,62}}, {{cx+200.f,cy-108.f},{35,38,62}} };
     w.draw(s1, 2, sf::Lines);
@@ -597,7 +597,7 @@ void renderLoadSelect(sf::RenderWindow& w, const sf::Font& font,
         const auto& si = slotInfos[i];
 
         drawRect(w, cx-210.f, ry, 380.f, 44.f, {18,20,36}, {35,38,62}, 1.f);
-        drawText(w, font, "Слот "+std::to_string(i+1), cx-200.f, ry+13.f, 12, {55,60,85});
+        drawText(w, font, "Слот "+std::to_string(i+1), cx-200.f, ry+13.f, 12, {100,105,135});
 
         std::string info = si.exists
             ? si.diff + "  /  " + std::to_string(si.score) + " оч."
@@ -652,18 +652,18 @@ void renderRecords(sf::RenderWindow& w, const sf::Font& font,
 
     float cx = WIN_W / 2.f;
     drawText(w, font, "ТАБЛИЦА РЕКОРДОВ", cx, 40.f, 36, {72,230,95}, true);
-    drawText(w, font, "Esc / R — назад",  cx, 88.f, 14, {55,60,85},  true);
+    drawText(w, font, "Esc / R — назад",  cx, 88.f, 16, {130,135,165}, true);
 
     if (recs.empty()) {
-        drawText(w, font, "Рекордов пока нет", cx, WIN_H/2.f, 22, {55,60,85}, true);
+        drawText(w, font, "Рекордов пока нет", cx, WIN_H/2.f, 22, {120,125,155}, true);
         return;
     }
 
     float startY = 125.f, lx = cx - 280.f;
-    drawText(w, font, "#",          lx,        startY, 14, {55,60,85});
-    drawText(w, font, "Дата",       lx+40.f,   startY, 14, {55,60,85});
-    drawText(w, font, "Сложность",  lx+200.f,  startY, 14, {55,60,85});
-    drawText(w, font, "Счёт",       lx+400.f,  startY, 14, {55,60,85});
+    drawText(w, font, "#",          lx,        startY, 14, {110,115,145});
+    drawText(w, font, "Дата",       lx+40.f,   startY, 14, {110,115,145});
+    drawText(w, font, "Сложность",  lx+200.f,  startY, 14, {110,115,145});
+    drawText(w, font, "Счёт",       lx+400.f,  startY, 14, {110,115,145});
     startY += 22.f;
     sf::Vertex sep[] = { {{lx,startY},{35,38,62}}, {{lx+560.f,startY},{35,38,62}} };
     w.draw(sep, 2, sf::Lines);
@@ -673,7 +673,7 @@ void renderRecords(sf::RenderWindow& w, const sf::Font& font,
     for (int i = 0; i < show; i++) {
         sf::Color col = (i==0 ? sf::Color{228,182,48} :
                          i <3 ? sf::Color{200,205,225} :
-                                sf::Color{95,100,125});
+                                sf::Color{120,125,155});
         float ry = startY + i*26.f;
         drawText(w, font, std::to_string(i+1),           lx,        ry, 14, col);
         drawText(w, font, recs[i].date,                  lx+40.f,   ry, 14, col);
