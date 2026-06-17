@@ -440,18 +440,29 @@ void renderPause(sf::RenderWindow& w, const sf::Font& font,
             float ry = cy - 102.f + i * 56.f;
             const auto& si = slotInfos[i];
 
-            drawRect(w, cx-210.f, ry, 380.f, 44.f, {20,22,40}, {35,38,62}, 1.f);
+            sf::Color rowBg  = si.corrupted ? sf::Color{40,10,10}  : sf::Color{20,22,40};
+            sf::Color rowBrd = si.corrupted ? sf::Color{140,35,35} : sf::Color{35,38,62};
+            drawRect(w, cx-210.f, ry, 380.f, 44.f, rowBg, rowBrd, si.corrupted ? 1.5f : 1.f);
             drawText(w, font, "Слот "+std::to_string(i+1), cx-202.f, ry+14.f, 8, {100,105,135});
 
-            std::string info = si.exists
-                ? si.diff + "  /  " + std::to_string(si.score) + " оч."
-                : "Пусто";
-            drawText(w, font, info, cx-148.f, ry+14.f, 8,
-                     si.exists ? sf::Color{160,165,185} : sf::Color{105,110,140});
+            if (si.corrupted) {
+                drawText(w, font, "Файл повреждён", cx-148.f, ry+14.f, 8, {230,80,80});
+            } else {
+                std::string info = si.exists
+                    ? si.diff + "  /  " + std::to_string(si.score) + " оч."
+                    : "Пусто";
+                drawText(w, font, info, cx-148.f, ry+14.f, 8,
+                         si.exists ? sf::Color{160,165,185} : sf::Color{105,110,140});
+            }
 
             auto ar = pauseSlotActionRect(i);
             bool ahov = ar.contains((float)mousePos.x, (float)mousePos.y);
-            if (saving || si.exists) {
+            if (si.corrupted) {
+                // повреждённый слот — кнопку загрузки не показываем
+                drawRect(w, ar.left, ar.top, ar.width, ar.height, {18,20,36}, {50,20,20}, 1.f);
+                drawText(w, font, "Ошибка", ar.left+ar.width/2.f, ar.top+ar.height/2.f,
+                         8, {120,40,40}, true);
+            } else if (saving || si.exists) {
                 sf::Color ac = saving ? sf::Color{72,230,95} : sf::Color{80,180,230};
                 drawButton(w, font, ar, saving ? "Сохранить" : "Загрузить", ac, false, ahov, 8);
             } else {
@@ -569,18 +580,27 @@ void renderLoadSelect(sf::RenderWindow& w, const sf::Font& font,
         float ry = cy - 92.f + i * 56.f;
         const auto& si = slotInfos[i];
 
-        drawRect(w, cx-210.f, ry, 380.f, 44.f, {18,20,36}, {35,38,62}, 1.f);
+        sf::Color rowBg  = si.corrupted ? sf::Color{40,10,10}  : sf::Color{18,20,36};
+        sf::Color rowBrd = si.corrupted ? sf::Color{140,35,35} : sf::Color{35,38,62};
+        drawRect(w, cx-210.f, ry, 380.f, 44.f, rowBg, rowBrd, si.corrupted ? 1.5f : 1.f);
         drawText(w, font, "Слот "+std::to_string(i+1), cx-202.f, ry+14.f, 8, {100,105,135});
 
-        std::string info = si.exists
-            ? si.diff + "  /  " + std::to_string(si.score) + " оч."
-            : "Пусто";
-        drawText(w, font, info, cx-148.f, ry+14.f, 8,
-                 si.exists ? sf::Color{160,165,185} : sf::Color{105,110,140});
+        if (si.corrupted) {
+            drawText(w, font, "Файл повреждён", cx-148.f, ry+14.f, 8, {230,80,80});
+        } else {
+            std::string info = si.exists
+                ? si.diff + "  /  " + std::to_string(si.score) + " оч."
+                : "Пусто";
+            drawText(w, font, info, cx-148.f, ry+14.f, 8,
+                     si.exists ? sf::Color{160,165,185} : sf::Color{105,110,140});
+        }
 
         auto ar = pauseSlotActionRect(i);
         bool ahov = ar.contains((float)mousePos.x, (float)mousePos.y);
-        if (si.exists) {
+        if (si.corrupted) {
+            drawRect(w, ar.left, ar.top, ar.width, ar.height, {18,20,36}, {50,20,20}, 1.f);
+            drawText(w, font, "Ошибка", ar.left+ar.width/2.f, ar.top+ar.height/2.f, 8, {120,40,40}, true);
+        } else if (si.exists) {
             drawButton(w, font, ar, "Загрузить", {80,180,230}, false, ahov, 8);
         } else {
             drawRect(w, ar.left, ar.top, ar.width, ar.height, {18,20,36}, {30,33,55}, 1.f);

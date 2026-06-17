@@ -44,12 +44,16 @@ static SaveSlotInfo readSlotInfo(const std::string& path) {
     std::ifstream f(path);
     if (!f.is_open()) return info;
     info.exists = true;
-    std::string line;
-    while (std::getline(f, line)) {
-        if (line.rfind("diff:", 0) == 0)
-            info.diff = diffName(static_cast<Diff>(std::stoi(line.substr(5))));
-        else if (line.rfind("score:", 0) == 0)
-            info.score = std::stoi(line.substr(6));
+    try {
+        std::string line;
+        while (std::getline(f, line)) {
+            if (line.rfind("diff:", 0) == 0)
+                info.diff = diffName(static_cast<Diff>(std::stoi(line.substr(5))));
+            else if (line.rfind("score:", 0) == 0)
+                info.score = std::stoi(line.substr(6));
+        }
+    } catch (...) {
+        info.corrupted = true;
     }
     return info;
 }
@@ -202,7 +206,7 @@ int main() {
                 else if (state == State::LOAD_SELECT) {
                     for (int i = 0; i < 3; i++) {
                         // Загрузить слот
-                        if (slots[i].exists &&
+                        if (slots[i].exists && !slots[i].corrupted &&
                             pauseSlotActionRect(i).contains((float)mp.x,(float)mp.y))
                         {
                             auto loaded = std::make_unique<Game>(Diff::HARMLESS);
@@ -276,7 +280,7 @@ int main() {
                                     }
                                 } else {
                                     // Загрузить из слота i
-                                    if (slots[i].exists) {
+                                    if (slots[i].exists && !slots[i].corrupted) {
                                         auto loaded = std::make_unique<Game>(Diff::HARMLESS);
                                         if (loaded->loadFromFile(SAVE_FILES[i])) {
                                             game = std::move(loaded);

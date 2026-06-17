@@ -55,11 +55,12 @@ enum class PausePanel { NONE, SAVING, LOADING };
 
 // ─── Информация о слоте сохранения ───────────────────────────────
 struct SaveSlotInfo {
-    bool        exists = false;
+    bool        exists    = false;
+    bool        corrupted = false;
     std::string diff;
-    int         score  = 0;
+    int         score     = 0;
 };
 
 // ─── Вспомогательные функции ─────────────────────────────────────
-std::string diffName(Diff d);    // название сложности на русском
+std::string diffName(Diff d);    // название сложности
 std::string currentDate();       // текущая дата и время

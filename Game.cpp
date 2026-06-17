@@ -265,47 +265,49 @@ bool Game::loadFromFile(const std::string& path) {
     grid.assign(ROWS, std::vector<Cell>(COLS, Cell::EMPTY));
     snake.clear();
 
-    std::string line;
-    while (std::getline(f, line)) {
-        if (line.empty() || line[0] == '#') continue;
+    try {
+        std::string line;
+        while (std::getline(f, line)) {
+            if (line.empty() || line[0] == '#') continue;
 
-        auto sep = line.find(':');
-        if (sep == std::string::npos) continue;
-        std::string key = line.substr(0, sep);
-        std::string val = line.substr(sep + 1);
+            auto sep = line.find(':');
+            if (sep == std::string::npos) continue;
+            std::string key = line.substr(0, sep);
+            std::string val = line.substr(sep + 1);
 
-        if      (key == "diff")     diff     = static_cast<Diff>(std::stoi(val));
-        else if (key == "score")    score    = std::stoi(val);
-        else if (key == "alive")    alive    = (bool)std::stoi(val);
-        else if (key == "aiMode")   aiMode   = (bool)std::stoi(val);
-        else if (key == "invCtrl")  invCtrl  = (bool)std::stoi(val);
-        else if (key == "invTick")  invTick  = std::stoi(val);
-        else if (key == "dir")      dir      = strToDir(val);
-        else if (key == "nextDir")  nextDir  = strToDir(val);
-        else if (key == "snake") {
-            // Парсим x,y;x,y;...
-            std::istringstream ss(val);
-            std::string seg;
-            while (std::getline(ss, seg, ';')) {
-                auto comma = seg.find(',');
-                if (comma != std::string::npos)
-                    snake.push_back({ std::stoi(seg.substr(0, comma)),
-                                      std::stoi(seg.substr(comma + 1)) });
+            if      (key == "diff")     diff     = static_cast<Diff>(std::stoi(val));
+            else if (key == "score")    score    = std::stoi(val);
+            else if (key == "alive")    alive    = (bool)std::stoi(val);
+            else if (key == "aiMode")   aiMode   = (bool)std::stoi(val);
+            else if (key == "invCtrl")  invCtrl  = (bool)std::stoi(val);
+            else if (key == "invTick")  invTick  = std::stoi(val);
+            else if (key == "dir")      dir      = strToDir(val);
+            else if (key == "nextDir")  nextDir  = strToDir(val);
+            else if (key == "snake") {
+                std::istringstream ss(val);
+                std::string seg;
+                while (std::getline(ss, seg, ';')) {
+                    auto comma = seg.find(',');
+                    if (comma != std::string::npos)
+                        snake.push_back({ std::stoi(seg.substr(0, comma)),
+                                          std::stoi(seg.substr(comma + 1)) });
+                }
             }
-        }
-        else {
-            // Объекты поля: FOOD:x,y или WALL:x,y и т.д.
-            Cell c = strToCell(key);
-            if (c != Cell::EMPTY) {
-                auto comma = val.find(',');
-                if (comma != std::string::npos) {
-                    int x = std::stoi(val.substr(0, comma));
-                    int y = std::stoi(val.substr(comma + 1));
-                    if (x >= 0 && x < COLS && y >= 0 && y < ROWS)
-                        grid[y][x] = c;
+            else {
+                Cell c = strToCell(key);
+                if (c != Cell::EMPTY) {
+                    auto comma = val.find(',');
+                    if (comma != std::string::npos) {
+                        int x = std::stoi(val.substr(0, comma));
+                        int y = std::stoi(val.substr(comma + 1));
+                        if (x >= 0 && x < COLS && y >= 0 && y < ROWS)
+                            grid[y][x] = c;
+                    }
                 }
             }
         }
+    } catch (...) {
+        return false;
     }
 
     return !snake.empty();
