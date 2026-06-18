@@ -62,7 +62,7 @@ Snake/
 
 ## Авторы
 
-- [@XareProge](https://github.com/XareProge) — разработка
+- [@XareProge](https://github.com/XareProge) — разработка или нет?
 
 ## Версии
 
