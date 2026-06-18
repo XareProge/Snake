@@ -1,0 +1,5 @@
+﻿# Сохранение игры Змейка
+diff:CORRUPT_DATA_HERE
+score:not_a_number
+alive:???
+snake:abc,xyz;garbage
