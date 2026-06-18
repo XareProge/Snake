@@ -10,7 +10,7 @@ std::vector<Record> loadRecords() {
     std::ifstream file("saves/records.txt");
     std::string line;
 
-    // Формат строки: дата|сложность|счёт|аи (4-е поле необязательно — совместимость с v3.0)
+    // Формат строки: дата|сложность|счёт|аи
     while (std::getline(file, line)) {
         if (line.empty()) continue;
         std::istringstream ss(line);
